@@ -42,6 +42,9 @@ check.
    slowest single field rather than the sum of all of them.
    Fields that are already populated are skipped entirely.
 
+   The run may begin with a short optional interview about your team's ticket preferences. Any proposed
+   preferences are shown once for approval before research starts.
+
    What this buys you: these fields are what ground Bridge's agents in THIS codebase. Planning,
    reviewing, and code generation all read them, so they follow your repository's actual
    architecture, testing, documentation, and correctness conventions instead of generic defaults.
@@ -59,9 +62,12 @@ check.
 
 4. Read and strictly obey the `agent_instructions` field in the response. Execute each step in order, announcing each as **Step N of M: <description>**.
 
-   Retain, for the closing summary: the consolidated research task's structured result (its per-field
+   Retain, for the closing summary: the ticket standard interview task's structured result (its
+   `outcome`, `gap_reason`, `draft_path`, and `character_count`) — if that result is failed, missing,
+   or unreadable, treat it as `gap — interview_failed` and keep going with the research — the
+   consolidated research task's structured result (its per-field
    `status`, `character_count`, `condensed`, and `condensation_reason`), each upload step's result,
-   and the final confirmation task's structured result. You will need all three — do not discard them
+   and the final confirmation task's structured result. You will need all four — do not discard them
    as you go.
 
 5. After all steps complete, display a summary built from the results you retained:
@@ -75,6 +81,7 @@ check.
    **Already populated (skipped)**: <fields skipped because they already had a value>
    **Condensed to fit the field limit**: <field — reason it was condensed, per field>
    **Gaps**: <fields whose research or upload failed, each named with its reason>
+   **Ticket standard**: <learned from interview / defaults (skipped) / already populated (skipped) / gap — unavailable / gap — update_failed / gap — interview_failed>
    **Confirmation**: <approved / applied / declined / pending human input / not applicable, per field>
 
    Review or edit any of these on the **Project Configuration** page, under **Code Writer Settings**
@@ -91,6 +98,15 @@ check.
    - Report confirmation candidates that could not be presented in a headless session with the exact
      phrase `pending human input`.
    - Every field that was condensed must appear with the reason it was condensed.
+   - Map the ticket standard result to its line this way: `learned_from_interview` is `learned from
+     interview`; `defaults` is `defaults (skipped)`; `skipped_existing` is `already populated
+     (skipped)`; `gap` is `gap — unavailable`, `gap — update_failed`, or `gap — interview_failed`,
+     according to its `gap_reason`.
+   - For `gap — update_failed`, include the retained draft path and warn that re-running
+     `/learn-repository` deletes the unsaved draft during setup, so it should be copied first.
+   - Any ticket standard gap makes an otherwise completed run `Completed with gaps`.
+   - Keep the ticket standard separate from the ten learned-field buckets. It is not a researched or
+     uploaded field, so never count it in them.
 
 6. **After** the `## Learn Complete` summary above is fully displayed, close with the same concise
    capability report `/install-bridge` renders (BAPI-658, AC-9). This is the recipe's ONE exception to

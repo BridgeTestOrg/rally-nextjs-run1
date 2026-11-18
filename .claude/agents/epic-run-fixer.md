@@ -112,7 +112,7 @@ By default open **no** PR: the engine opens a missing PR after a committed adopt
 
 Record verification evidence only for required steps you actually ran at your final head, and only in `fix` mode.
 
-1. Read the ticket's state with `get_ticket_delivery_readiness`, and call `get_phase_context` (phase `pre_pr_verification`). Both phase-tool calls carry the same run scope:
+1. Read the ticket's state with `get_ticket_delivery_readiness`, and call `get_phase_context` for **each applicable phase**: `pre_pr_verification`, plus any other phase the readiness or phase context reports as owning steps whose evidence is not at `final_head`. Both phase-tool calls carry the same run scope:
 
    - `epic_run_id`: the run key from the brief.
    - `ticket_key`: the ticket from the brief.
@@ -122,7 +122,9 @@ Record verification evidence only for required steps you actually ran at your fi
 
    The scope makes the server recover the ticket's existing delivery binding by run and ticket. It is recovery only: it enrolls no branch, registers no execution, and supersedes no binding. The tool checks that `worktree_path` is a real worktree of this repository and records its head and tree. It does not check that the worktree belongs to this ticket; the brief's assignment is what makes it yours. Never copy the executor's `.conductor/` files to establish a binding.
 2. If the run scope cannot be recovered or the worktree cannot be verified (the `delivery` summary reports an `outcome` such as `unmanaged`, `no_recoverable_execution`, `ambiguous`, `lookup_failed`, `worktree_unverified` or `worktree_head_changed`), record no evidence and report the missing scope in `remaining_work`.
-3. Make **one** `record_phase_result` call for `pre_pr_verification` that settles every step that phase owns, reporting each step you did not run as not run with its reason.
+3. Re-record every owned step of **each applicable phase** at `final_head`, with **one** `record_phase_result` call per phase. Each call settles every step that phase owns, reporting each step you did not run as not run with its reason. Phase submissions are all-or-nothing, so never send a partial phase.
+
+   Results from an older head are never current-head evidence: do not copy or re-present them as recorded at `final_head`. Phase records also do not replace the executor's own verification or merge admission; the engine still decides both.
 
 A hand-off is allowed only in `fix` mode, for a required step you actually invoked and then re-ran once with one materially different corrected invocation, where both invocations met the missing capability before producing any result. Record that step `escalated`, without `prDependency`, with a `handoff` object of exactly six fields: `cause` (one of `no_live_server`, `no_database`, `toolchain_unavailable`, `credential_unavailable`, `mcp_unavailable`); `criterion` (the requirement the attempted step was meant to establish); `observation` (bounded, secret-free evidence of the missing capability from the first invocation); `corrected_invocation` (the materially different rerun that actually occurred, and the capability it hit); `observed_head_sha` (the head at which you record the evidence); and `next_action` (the concrete action needed to complete verification). A step that already failed at one head can be handed off only from a new head, never from the head where it failed. A failed assertion, an application error, and unfinished work are blockers, never hand-offs.
 4. An earlier failed step clears only through a new passing record at the new head. Claims, missing evidence, and anything in the supervisor's adopt request do not clear it. An escalated hand-off never clears an earlier failure.

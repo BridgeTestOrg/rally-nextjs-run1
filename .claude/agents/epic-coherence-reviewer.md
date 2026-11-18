@@ -41,6 +41,8 @@ The document holds `epic` (`key` or `slug`, `title`, and `acceptance_criteria` w
 
 - `touched_files` lists files a child **edits or creates**. A `touched_files` path that does not exist yet can be a planned creation. That alone is not a finding.
 - `read_files` lists files a child **only reads**. A `read_files` path that does not exist is a blocking `input` finding. A path in both lists of one child is an `input` finding.
+- `handoff_roles` is optional on a manifest entry. It lists `{thing, role}` entries: `thing` is a stable id such as `H-1`, and `role` is one of `write`, `read`, `caller`, `start`, `steady_state`, `wind_down`, or `consumer`. An `owns_verifications` entry may carry `e2e: true` to name the child that owns the end-to-end test. Both are **claims** the drafting caller wrote, not proof. Older callers omit them; their absence is never a finding by itself, and you review such a manifest exactly as before.
+- `design_text` may hold a line starting `no_cross_child_flow:` with a reason. It is the caller's claim that no value passes between children; you still check it against the children's scope and evidence.
 - Each `non_child_owners` entry has `id`, `kind` (`owner_run`), `who`, `step_ref`, `step_text`, `records_result_in`, and `owns_verifications`. A malformed entry — a duplicate id, an id equal to a child id, another `kind`, an empty required field, or an `epic_ac` that names no real epic AC — is an `input` finding. Never guess what a malformed entry meant.
 
 If the document is missing, unreadable, or malformed enough that you cannot review it, say so as a blocking `input` finding. Do not produce a review that looks complete.
@@ -85,6 +87,8 @@ A **write path** is the public way a caller persists the value: a route, tool, o
 
 Every empty cell is a finding. It names the **thing**, the **consumer**, the **missing end**, the supporting evidence, and the smallest amendment.
 
+**Declared roles are claims, not proof.** When a manifest entry carries `handoff_roles`, check every declared role against that child's own `child_evidence` the way Step 2 checks `owns_verifications`: the role counts only when the child's acceptance criteria or body make a concrete commitment to that end of the hand-off. Cite the supporting commitment for each role you accept. A declared role with no supporting commitment leaves its cell empty, which is a finding. Build the **complete** grid yourself from the scope, body, and acceptance criteria of every child: a thing or a consumer the declarations leave out is still a row, and its empty cells are still findings. A clean declaration set never shortens the grid or the review. A mechanical structural check may already have confirmed that the declarations are complete; that confirms the declarations only, never that they are true.
+
 Grid cells are **child-owned only**. An owner-run declaration never fills a write, read, caller, start, steady-state, or wind-down cell. A write path, read path, or caller that only an owner-run step provides is still an empty cell and still a finding, even when the owner-run step mentions it.
 
 Three further checks are **advisory everywhere**. They never use `severity: blocking`, never carry the finding fields `scope` or `child`, and use only the existing finding kinds and fields.
@@ -110,6 +114,8 @@ Inspect **only** existing repository files explicitly named in a child's `touche
 ### Step 5: Apply the end-to-end proof rule (AC-4)
 
 If the epic adds a stored value or a cross-child data flow, some child's acceptance criteria must commit to a test that **writes through the real public write path and reads through the real consumer**. Name that child. If none does, raise an `e2e_proof` finding.
+
+An `owns_verifications` entry marked `e2e: true` is a **claim** that its child owns that test. Accept it only when that child's acceptance criteria in `child_evidence` commit to a concrete test from the real public write path to the real consumer. A marker whose child commits only to a reader test, a fixture fed directly, or a generic "end-to-end test" with no write path and consumer named is not proof: raise the `e2e_proof` finding as if no marker were present. A missing marker is never a finding by itself when a child's evidence does commit to such a test.
 
 ### Step 6: Check the split against the goals and NFRs
 
@@ -138,9 +144,13 @@ Give every finding:
 
 Every **blocking** finding also has a closed `scope`: `foundation` or `ticket_local`. A `ticket_local` blocker has exactly one manifest child id in `child`; a `foundation` blocker has no child. Advisory findings have neither field. Use `foundation` when assessing the gap needs multiple children or the epic's own criteria. Use `ticket_local` for the smallest independently amendable owner visible from one child and its named code. Default `coverage`, `handoff`, `e2e_proof`, and `input` to foundation; default `fit` to ticket-local unless the mismatch spans two children's contracts. Classify a deferral conflict as `foundation`, even inside one child. An epic-AC reference alone does not make a single-child gap foundation. If no child is unambiguous, classify it foundation rather than producing an unowned ticket-local finding.
 
+**Classify by effect.** A finding whose effect leaves an epic acceptance criterion with no owner is `kind: coverage`, and a finding whose effect leaves the end-to-end test with no owner is `kind: e2e_proof`, whatever else it touches. For example, a broken hand-off that means no child can carry out AC-3's verification sentence is `coverage`, not `handoff`; a fit mismatch that means the only end-to-end test cannot run through the real write path is `e2e_proof`, not `fit`. Name the other subject in the evidence. These two kinds decide what a caller may do with the finding: a caller assigns them to a ticket or asks the owner, and never accepts them as known gaps, so a mis-classification can let an unowned requirement through.
+
 Keep an id stable for the same substantive gap across rounds. When a later round changes it, explicitly state whether it corrects or supersedes the earlier finding; do not silently close or replace an identity.
 
 Describe the amendment only. You do **not** edit, rescope, or re-split the manifest. The caller does that.
+
+Every round is a fresh-context review of the **whole** manifest. In a later round, report every blocking finding you observe anywhere, including on a child that did not change since the previous round. A child being unchanged is never a reason to skip it or to soften a finding on it.
 
 Mark a finding `blocking` when an epic AC is `uncovered` or `partial`, when a hand-off end is unowned, when a fit mismatch is observed, when the e2e proof is absent, or when Step 6 finds a child working against an NFR or NFR work no child carries. Findings raised by the three new Step 3 advisory rules are never blocking, even when they name a hand-off; existing contract mismatches and other blocking triggers on the same hand-off or child remain blocking. Mark it `uncertain` when the evidence cannot settle the question.
 

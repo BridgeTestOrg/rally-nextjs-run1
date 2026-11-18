@@ -47,7 +47,7 @@ Preserve the original description in this failure report. Do not attempt to draf
 
 ## Step 4 — Verify the Output
 
-1. **Capture exactly one path** from the agent's response. If the response names no path, or more than one plausible output path, this is an output-verification failure — not an agent-invocation failure. Stop and report:
+1. **Capture exactly one path** from the agent's response. The path is the first line of the reply. Only when its standard lookup failed or a configured instruction conflicted does a reply carry a standard warning: a fenced code block with info string `ticket-standard`, holding `Ticket standard: …` and `Standard conflicts: …`, just before the terminal `open-questions` block. Find it by its info string, never by line position. Its lines are not paths, and they do not count toward the single-path rule. Retain that pair separately from the path, exactly as the writer returned it. If the response names no path, or more than one plausible output path, this is an output-verification failure — not an agent-invocation failure. Stop and report:
    ```
    The Jira Ticket Writer did not return a single verifiable draft path. No substitute was drafted
    inline. Original description preserved below.
@@ -81,6 +81,8 @@ Preserve the original description in this failure report. Do not attempt to draf
 
    A phrase match is not an invalid writer report. Keep the two separate.
 
+Never write a standard report the writer did not return, and never put the pair into the draft file. No `ticket-standard` block is normal: add no note. Report a malformed one and continue; it does not fail the draft.
+
 Distinguish the two failure kinds explicitly in whichever report you give: an agent-invocation failure (Step 3) means the writer could not be reached or run at all; an output-verification failure (this step) means the writer ran but its output could not be verified.
 
 ## Final Report
@@ -88,6 +90,7 @@ Distinguish the two failure kinds explicitly in whichever report you give: an ag
 **On success**, display:
 
 > **Draft ready**: {verified exact path}
+> {only on a warning: **Standard warning**: the writer's `Ticket standard:` line and `Standard conflicts:` line}
 >
 > **Open questions**: each question with its blocking reason and options, or `none`.
 >

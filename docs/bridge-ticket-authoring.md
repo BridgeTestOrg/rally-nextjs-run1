@@ -78,6 +78,11 @@ siblings — no epic parent, no manifest. The threshold is exactly three.
 `drive-epic`, which selects the runnable path itself. Never present a choice
 between conductors.
 
+**Planted placeholders hand over.** A ticket that plants a placeholder test or
+stub for a later ticket says so, and the later ticket's body gives explicit
+permission to replace that placeholder. A rule such as "never edit existing
+assertions" never covers a planted placeholder.
+
 **Departure is closed-list only.** These three exceptions, and no others, permit
 departing from the rules above. Invoking one requires no announcement.
 
@@ -384,22 +389,24 @@ redone and the gate is shown again. A changed requirement or goal goes back
 through requirements and the drafting plan instead.
 
 **Implications, then the drafting plan.** After requirements are ratified,
-`/define-tickets` Stage 6 shows the implications and waits for the operator to
-confirm them, ask a question, request a change, or proceed. Questions keep this
-checkpoint open. A change causes a fresh implications review before the plan is
-shown in a later turn. If the review is unavailable, the operator still sees a
-warning and must clearly request to proceed. The plan recommends a council
+`/define-tickets` Stage 6 shows the implications review and the recommended
+drafting plan together in one output-only message, on the full and short paths
+alike, and then continues without waiting (BAPI-1768). If the review is
+unavailable, the message says so at the top. The plan recommends a council
 before the design, a review after the design (a council, or a second opinion for one or two separate
 questions), or no council, and it records the gap-check policy for a possible
-epic. Choosing a council option also covers the later review of how an epic's
-tickets are split, so that decision is not asked again. An unclear reply starts
-nothing and the plan is shown again. Unattended runs take the recommended option
-and keep the epic gap check required. The attended flow has four ordinary stops:
-the requirements page, implications checkpoint, drafting plan, and upload gate.
-The attended short path, chosen for likely 1-2 ticket work with a precedent and
-no forced-full area, normally has two: the requirements page and the upload gate.
-It shows the implications review and the drafting plan together in one message.
-See [the short-path decision record](BAPI-1660-define-tickets-short-path.md).
+epic. A paid review in the plan runs because the message states it with its
+credits first. Choosing a council option also covers the later review of how an epic's
+tickets are split, so that decision is not asked again. Unattended runs take the recommended option
+and keep the epic gap check required. The attended flow has two ordinary stops
+on both paths: the requirements page and the upload gate. A per-repository
+setting, `define_tickets_plan_stop`, will restore one combined implications-and-plan
+stop when set to `ask`; until that setting is read, every run is automatic.
+Every decision the agent makes after ratification is recorded in the exploration
+document's `## Decisions made for you` section and shown at the upload gate,
+where the owner can reverse it before anything is created. See
+[the short-path decision record](BAPI-1660-define-tickets-short-path.md) and
+[the BAPI-1768 record](BAPI-1768-define-tickets-leaner-command.md).
 The initial high-risk coherence council is offered
 by the shared procedure itself, in an attended run, after the epic is classified
 high risk and before round 1, with its cost and a recommendation. Declining it

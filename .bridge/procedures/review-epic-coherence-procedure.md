@@ -35,6 +35,9 @@ person use the same words.
 | coverage map | Who covers each requirement |
 | accept override | Create anyway, and record the gap on the epic |
 | fix | Change how the tickets are split |
+| assign | Give this requirement to ticket N |
+| needs-owner item | Needs your answer: name a ticket, or remove it from scope |
+| `covered_by_design_council` | Council: already covered by the design council |
 
 - **Qualified pass.** In drafting mode, a passing record that carries ticket-local findings is
   shown as `No gaps found (N notes added to tickets)`.
@@ -95,7 +98,10 @@ The document carries artifacts only. It never carries the drafting conversation.
       "touched_files": ["path/relative/to/repo.py"],
       "read_files": ["path/the/child/only/reads.py"],
       "owns_verifications": [
-        { "epic_ac": "AC-1", "obligation": "The concrete part of AC-1's verification this child carries out" }
+        { "epic_ac": "AC-1", "obligation": "The concrete part of AC-1's verification this child carries out", "e2e": true }
+      ],
+      "handoff_roles": [
+        { "thing": "H-1", "role": "write" }
       ]
     }
   ],
@@ -118,7 +124,20 @@ The document carries artifacts only. It never carries the drafting conversation.
         { "epic_ac": "AC-2", "obligation": "Run the production smoke test and post its output on the epic" }
       ]
     }
-  ]
+  ],
+  "design_council": {
+    "council_id": "<the completed design council id>",
+    "design_revision": "<the design revision it reviewed>",
+    "split_reviewed": true,
+    "materiality": {
+      "requirements": "unchanged",
+      "interfaces_or_contracts": "unchanged",
+      "ownership": "unchanged",
+      "dependencies": "unchanged",
+      "end_to_end_proof": "unchanged",
+      "blast_radius": "unchanged"
+    }
+  }
 }
 ```
 
@@ -172,6 +191,30 @@ Field rules:
   lived only there could change without changing the review's identity. The copied, hashed
   `step_text` is the reviewed commitment. An owner-run owner owns **coverage only**: it never
   fills a hand-off grid cell. When the array is absent, no AC has a non-child owner.
+- `handoff_roles` is optional on a manifest entry. It is a list of `{thing, role}` entries the
+  drafting caller declares. `thing` is a stable id matching `^[A-Z]+-\d+$`, for example `H-1`,
+  shared by every child that touches the same value. `role` is one of `write`, `read`, `caller`,
+  `start`, `steady_state`, `wind_down`, or `consumer`. It sits inside `manifest`, so it is
+  hashed: moving a role to another child changes `manifest_sha256` and invalidates a record
+  bound to the old digest, with no change to the identity rules.
+- `e2e` is optional on an `owns_verifications` entry. `e2e: true` marks the child that owns the
+  end-to-end test of the epic's cross-child flow. It is hashed with the manifest. Only a child
+  can own it; on a `non_child_owners` entry it never counts.
+- A `design_text` line starting `no_cross_child_flow:` followed by a non-empty reason declares
+  that no value passes between children. It must start the line. `design_text` is not hashed.
+- `design_council` is an optional **top-level** object. A drafting caller writes it only when a
+  design council already completed for this design. It carries `council_id` and
+  `design_revision` (non-empty strings), `split_reviewed` (a boolean: the council reviewed this
+  ticket split), and `materiality`, an object with exactly the keys `requirements`,
+  `interfaces_or_contracts`, `ownership`, `dependencies`, `end_to_end_proof`, and
+  `blast_radius`. Each value is `"unchanged"` or a short note saying what the split changed
+  since that council. It sits **outside every digest**; "High-risk trigger" below reads it, and
+  clearance checks it directly through `design_council_basis`.
+
+All four are **declarations** and **claims**. The reviewer verifies them against
+`child_evidence` and never treats one as proof. They are optional for every caller:
+`/plan-epic`, `/idea-to-ticket`, and `/review-epic-coherence` need not supply them, and a
+manifest without them is reviewed exactly as before.
 
 **Local markdown drafts.** When an epic is drafted as local markdown files outside a drafting
 surface, build this document with the packaged `epic-coherence-input build` subcommand of the
@@ -182,7 +225,8 @@ dependencies, size band, `edits` (which become `touched_files`), `reads` (which 
 epic draft must start with an explicit id such as `AC-3:`; the builder never numbers ACs by
 position or matches them by keyword. `epic-coherence-input check <input-path>` validates an
 existing document against the structural rules in "Validation" and prints the three digests. It
-never judges coverage; that stays the reviewer's job. The three drafting surfaces keep their
+never judges coverage; that stays the reviewer's job. `epic-coherence-input check --structural
+<input-path>` adds the declaration checks in "Validation"; only `/define-tickets` requires it. The three drafting surfaces keep their
 structured normalization, and the on-demand `/review-epic-coherence` command keeps building its
 input from ticket data.
 
@@ -242,6 +286,25 @@ finding. Nothing is silently dropped.
 - A missing verification sentence alone is **advisory**. Any problem that prevents a meaningful
   review (no epic acceptance criteria, an empty manifest, an unreadable input document) makes
   the verdict `not_checked`. It never produces a complete-looking coverage map.
+
+**Plain and structural checking.** The rules above are the plain check every caller runs,
+mechanically through `epic-coherence-input check <input-path>` where the caller uses the
+packaged subcommand. `/define-tickets` also runs `epic-coherence-input check --structural
+<input-path>`, which checks the declarations: every epic AC is claimed by a child or a
+non-child owner (`unclaimed_epic_ac`), every declared `thing` that spans two children has
+write, read, and caller owners (`handoff_missing_role`), every read or consumed `thing` has a
+write and a caller owner whatever its span (`handoff_missing_write_or_caller`), every role is
+well formed (`malformed_handoff_role`), a cross-child flow has a child `e2e` owner
+(`missing_e2e_owner`), two or more children either share a `thing` or give a
+`no_cross_child_flow:` reason (`no_cross_child_declaration`, `no_cross_child_flow_contradicted`),
+`depends_on` names known children and forms no cycle (`depends_on_unknown_child`,
+`depends_on_self`, `depends_on_cycle`), `recommended_after` names known children
+(`recommended_after_unknown_child`, `recommended_after_self`), and any `design_council` is well
+formed (`malformed_design_council`). On success it prints `design_council_covers_high_risk`.
+A clean structural result proves the declarations are complete and consistent; it never proves
+they are true, so the reviewer still runs. Other callers never run structural mode: callers that
+declare no hand-off roles would fail every manifest of two or more children on
+`no_cross_child_declaration`.
 
 Describe variable paths in words or angle brackets, such as `<output-directory>`. Do not write
 any literal brace-wrapped identifier other than `docs_dir`, including in examples.
@@ -373,6 +436,22 @@ tell and show the card again.
 
 **When the council starts.**
 
+- **High-risk trigger: already covered by a design council.** Before any card or request for
+  the high-risk trigger, read the input's `design_council`. Evaluate the skip predicate exactly
+  as `epic-coherence-input check --structural` reports it in `design_council_covers_high_risk`:
+  it is true only when `design_council` is present and well formed (non-empty `council_id` and
+  `design_revision`, a boolean `split_reviewed`, and a `materiality` object with exactly the keys
+  `requirements`, `interfaces_or_contracts`, `ownership`, `dependencies`, `end_to_end_proof`,
+  and `blast_radius`, each a non-empty string) **and** either `split_reviewed` is `true` or every
+  `materiality` value is exactly `"unchanged"`. When it is true, request **no** council for the
+  high-risk trigger, show no card, and record `council_id: null`, `council_outcome:
+  "covered_by_design_council"`, and `design_council_basis: { "council_id": <the design council
+  id>, "design_revision": <its design_revision> }`. Say in the report why the council was not
+  started: the design council already reviewed this design, and the split did not materially
+  change it. This skips only the initial high-risk council. It removes neither the reviewer
+  rounds, the high-risk round limit, nor the uncertain and disputed triggers below, which keep
+  their cards, costs, preapproval, and limits unchanged. When the predicate is false, or
+  `design_council` is absent or malformed, the high-risk trigger behaves exactly as below.
 - **High-risk trigger.** After the epic is classified high risk before round 1, an attended run
   shows the decision card **before** round 1 starts. It explains the high-risk reason in plain
   words from `risk_reasons`, for example "two tickets both change the database layer", without
@@ -442,6 +521,10 @@ may accept it with a typed override of kind `accept` that names its `council_id`
 
 A council outcome of `declined_by_operator` is resolved and needs no `accept` override, whether it was declined at the pre-round-1 ask or through legacy `council_preapproval: declined`. A legacy `accept` override targeting `council: "declined_by_operator"` remains valid but is ignored for clearance.
 
+A council outcome of `covered_by_design_council` is also resolved and needs no `accept` override: no council request was made, because recorded design-council evidence already covered the high-risk trigger. It stays resolved only while its basis still matches the input:
+
+Refuse clearance for a `covered_by_design_council` record unless its `design_council_basis.council_id` and `design_council_basis.design_revision` match the corresponding members of the current input’s `design_council`, and that `design_council` is still well formed and satisfies the skip predicate: `split_reviewed` is `true` or every `materiality` value is `"unchanged"`.
+
 **Declining an escalation council.** Declining a council offered for an uncertain or disputed
 finding resolves the council decision only. The finding itself stays blocking until it is
 amended or accepted by its own `finding_id`.
@@ -489,6 +572,13 @@ Drafting mode is for a drafting surface that can still change the manifest.
   amendment confirmed. Record it in `rounds[]` with `"confirmation": true`.
   - A confirmation pass **never** starts another automatic amendment loop. A new blocking
     finding goes to attended fix-or-accept, or to the unattended halt.
+  - **A new foundation finding in a later round stays blocking**, wherever it lands in the
+    manifest, including on a child that did not change since the earlier round. Every round and
+    confirmation pass is a whole-manifest review; only a caller's draft reuse may be selective.
+    A proposed acceptance from an earlier round may be carried to a re-raised finding only when
+    the gap, the evidence, the kind, and the affected entries are substantively unchanged; the
+    carried proposal then rebinds to the new round and identities. Changed or uncertain
+    equivalence needs a fresh settlement.
   - In an **attended** run, after the first confirmation pass, the operator may direct **at
     most one** fix of a confirmation blocker. Then run **one** further whole-manifest
     confirmation pass, so the last round bears the final digests. That is the whole budget
@@ -503,19 +593,39 @@ Drafting mode is for a drafting surface that can still change the manifest.
   with an override of kind `bypass` carrying a typed reason. The verdict is then
   `not_checked`, never `pass` or `accepted_with_gaps`, and the top-level digests still describe
   the amended input. An **unattended** run halts instead.
+- **Acceptance by effect.** A foundation blocking finding of kind `coverage` (a requirement no
+  ticket owns) or `e2e_proof` (no end-to-end test) can **never** be cleared by an `accept`
+  override. It has exactly two resolutions: **assign** it, by amending the manifest so a
+  ticket, existing or new, owns the requirement or the end-to-end test; or an **explicit
+  requirement change the owner makes**, removing the requirement from scope. Every other
+  foundation finding (`handoff`, `fit`, `input`) may still be accepted with a non-empty reason.
+- **Removing a requirement is the owner's decision.** Removing a ratified requirement from scope
+  is a requirement change, never an amendment. Only the owner's answer at the caller's existing
+  approval surface (the `/define-tickets` upload gate, or the caller's own approval or create
+  screen) can make it. The agent never removes a requirement to clear a gap. The change updates
+  the ratified set and invalidates the affected coverage, the review evidence bound to the old
+  input, and the affected drafts; the caller rebuilds the input and reviews it again before a
+  fresh approval.
 - **Automatic amendment.** When the caller passed `auto_amend: true`, an attended run amends
   and rechecks within the same round and confirmation bounds with no question, as an unattended
-  run does. After the bound, each remaining foundation blocking finding goes to the caller's
-  create screen with an agent-drafted reason. The operator's approval there records it as an
-  `accept` override. It is never a halt.
+  run does. The caller assigns a remaining `coverage` or `e2e_proof` finding to a ticket. When
+  no ticket can own it, the create screen shows it as needing the owner's answer (name a
+  ticket, or remove it from scope), never with an accept reason, and nothing clears until the
+  owner answers. After the bound, each other remaining foundation blocking finding goes to the
+  caller's create screen with an agent-drafted reason. The operator's approval there records it
+  as an `accept` override. It is never a halt.
 - **Attended resolution.** After the bound, each remaining **foundation** blocking finding must be
-  fixed within the same one-fix, one-further-confirmation-pass budget, or accepted with a non-empty reason.
+  fixed within the same one-fix, one-further-confirmation-pass budget, or resolved by the effect
+  rule above: a `coverage` or `e2e_proof` finding is assigned to a ticket or removed from scope
+  by the owner's explicit requirement change; any other foundation finding may be accepted with
+  a non-empty reason.
   Ticket-local blockers are carried to their child ticket; they do not require a foundation amendment
   or acceptance to clear the epic record.
   The reason may be typed by the operator or drafted by the agent and shown at the create gate
   where that gate applies. An accepted finding is an override with `kind: accept`, plus
   `finding_id`, `reason`, `accepted_by`, and `round`. Declining a foundation finding keeps the verdict `blocked`.
-  When **every** remaining foundation blocking finding is accepted, the verdict is `accepted_with_gaps`.
+  When **every** remaining foundation blocking finding is accepted, and none of them is of kind
+  `coverage` or `e2e_proof`, the verdict is `accepted_with_gaps`.
 - **Unattended halt.** If any foundation blocking finding remains after the bound, the verdict is
   `blocked`. Return an explicit halt signal: **do not call `create_ticket`**. The caller must
   stop.
@@ -528,7 +638,11 @@ inline execution also fails), or the material prevents a meaningful review, the 
 
 - **Attended:** tell the person "Couldn't check", then offer a retry, or a bypass with a typed
   reason. A bypass is recorded as an override with `kind: bypass`. The verdict stays
-  `not_checked`.
+  `not_checked`. A caller may instead retry within its existing round bounds and defer this
+  question to its own approval surface: `/define-tickets` keeps drafting and shows "Couldn't
+  check" at the upload gate as an item needing the owner's answer. The deferral never weakens
+  the rule: creation still needs the owner's typed bypass reason, and nothing clears without
+  it. Other callers keep asking where they ask today.
 - **Unattended:** halt.
 
 ## Report mode
@@ -648,9 +762,18 @@ Write `epic-coherence.json` into the output directory:
 }
 ```
 
+When the high-risk council was skipped on design-council evidence, the record instead carries
+`"council_outcome": "covered_by_design_council"`, `"council_id": null`, and
+`"design_council_basis": { "council_id": "<design council id>", "design_revision": "<its revision>" }`.
+
 Rules:
 
 - `schema_version` is `3`. Readers also accept versions `1` and `2`; interpret every legacy blocking finding as `foundation`.
+- **The effect rule applies to every schema version.** In versions `1`, `2`, and `3`, an
+  `accept` override never clears a foundation blocking finding of kind `coverage` or
+  `e2e_proof`. A historical record that accepted one stays readable, and its override stays
+  visible as history, but it does not clear: the finding still needs an owner or the owner's
+  requirement change. An `accept` of any other foundation finding clears as before.
 - In version 3, validate every blocking finding's closed `scope` and every `ticket_local` child against the final manifest before counting, clearing, or carrying. Invalid or orphaned ownership fails closed; reclassify an ambiguously owned former carry as foundation explicitly.
 - `blocking_count` is the sum of `foundation_blocking_count` and `ticket_local_blocking_count`; count every blocking finding regardless of confidence.
 - `pass` requires zero unresolved foundation blockers.
@@ -685,7 +808,8 @@ Rules:
 - `owner_run_acs` lists the id of every epic AC with at least one owner-run owner. It is empty
   when there are none. Owner-run coverage is always visible, never silently passed.
 - `council_id` is `null` when no council ran. `council_outcome` is one of `not_run`,
-  `concluded`, `failed`, `timed_out`, `still_running`, or `declined_by_operator`. These two fields describe the first
+  `concluded`, `failed`, `timed_out`, `still_running`, `declined_by_operator`, or
+  `covered_by_design_council`. These two fields describe the first
   council. When a second council runs, `councils` lists **every** council in order, each with
   `council_id`, `trigger` (`uncertain`, `disputed`, or `high_risk`), and `outcome`. An override
   that accepts an unfinished council carries `council_id` in place of `finding_id`.
@@ -694,6 +818,12 @@ Rules:
   retained there when a later council also needs an entry in `councils`. It needs no override.
   Older records may carry an override with `council: "declined_by_operator"` in place of
   `finding_id` or `council_id`; it stays valid and is ignored for clearance.
+- `covered_by_design_council` means no initial council was requested because the input's
+  `design_council` satisfied the skip predicate in "Council call". It is resolved without an
+  `accept` override. The record then carries `design_council_basis` with exactly the
+  `council_id` and `design_revision` it relied on, and `council_id` stays `null` because no
+  council ran. `design_council_basis` is absent on every other record. A later uncertain or
+  disputed council still gets its own `councils` entry.
 - `council_preapproval` is present only when a caller supplied it. It persists its
   `value` and `source`, and the record omits the field otherwise, including after an attended
   decline at the pre-round-1 ask.
