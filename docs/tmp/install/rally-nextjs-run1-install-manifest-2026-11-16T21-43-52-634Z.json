@@ -1,0 +1,2219 @@
+{
+  "repo_name": "rally-nextjs-run1",
+  "groups": [
+    {
+      "key": "project_context",
+      "title": "Project context",
+      "fields": [
+        {
+          "field_name": "working_in",
+          "is_set": false,
+          "current_value": null,
+          "guidance": "Choose the project's primary technology or platform, ONLY from the known platform-label allowlist: Salesforce Commerce Cloud, Salesforce Core, Scayle, Shopify, Python, JavaScript/TypeScript, Go, Java/Kotlin, Ruby, .NET, Other. Infer it from the codebase (frameworks, package manifests, cartridge structure). Choose 'Other' when no listed language family is truthful for the project.",
+          "examples": "e.g., 'Salesforce Commerce Cloud', 'Shopify', 'Python', 'JavaScript/TypeScript', 'Go'",
+          "validation_summary": "One of the known platform labels; blank clears the field.",
+          "requires_confirmation": false
+        },
+        {
+          "field_name": "version",
+          "is_set": false,
+          "current_value": null,
+          "guidance": "Only set this when the platform has a meaningful variant concept (primarily Salesforce Commerce Cloud storefronts). Do NOT invent a version when the platform has no version concept — leave it unset.",
+          "examples": "e.g., 'sfra', 'pwakit', 'sitegenesis', 'storefrontnext', 'hybrid', 'python'",
+          "validation_summary": "One of the known repository versions; blank clears the field.",
+          "requires_confirmation": false
+        },
+        {
+          "field_name": "project_description",
+          "is_set": false,
+          "current_value": null,
+          "guidance": "Draft a concise (1-3 sentence) description of what the project does, derived from the codebase and any README. This field requires explicit human approval before it is written.",
+          "examples": "e.g., 'AI-powered Jira integration platform: code review, estimation, ticket analysis via LLM agents.'",
+          "validation_summary": "Free text up to 1200 characters; requires human confirmation; blank clears.",
+          "requires_confirmation": true
+        },
+        {
+          "field_name": "greenfield_setup_path",
+          "is_set": false,
+          "current_value": null,
+          "guidance": "Set by the greenfield install path only; never derive on an established repository; never set by hand.",
+          "examples": "e.g., 'interview', 'defaults' (or null when no greenfield path ran)",
+          "validation_summary": "One of: interview, defaults (case-insensitive); null/blank means no greenfield path ran and is the correct state for an established repository.",
+          "requires_confirmation": false
+        }
+      ]
+    },
+    {
+      "key": "repository_scope",
+      "title": "Repository scope",
+      "fields": [
+        {
+          "field_name": "version_control_system",
+          "is_set": false,
+          "current_value": null,
+          "guidance": "Set to 'github' or 'bitbucket' based on the repository's remote. Omit if the remote host is neither of these or cannot be determined.",
+          "examples": "e.g., 'github', 'bitbucket'",
+          "validation_summary": "One of: github, bitbucket (case-insensitive); blank clears the field.",
+          "requires_confirmation": false
+        },
+        {
+          "field_name": "base_branch",
+          "is_set": true,
+          "current_value": "main",
+          "guidance": "Set to the repository's primary integration branch (often 'main' or 'develop'). Omit to let automations default to 'main'.",
+          "examples": "e.g., 'main', 'develop', 'release/2026.1', 'integration'",
+          "validation_summary": "Branch name up to 255 chars; no leading '-' or control chars; blank clears.",
+          "requires_confirmation": false
+        },
+        {
+          "field_name": "custom_directories",
+          "is_set": false,
+          "current_value": null,
+          "guidance": "List non-default source directories that hold first-party code worth indexing. Omit when the default layout already covers the codebase.",
+          "examples": "e.g., ['app/custom', 'packages/shared']",
+          "validation_summary": "List of directory strings; combined length <= 1000 chars; blank clears.",
+          "requires_confirmation": false
+        },
+        {
+          "field_name": "exclude_directories",
+          "is_set": false,
+          "current_value": [],
+          "guidance": "List directories that should NOT be indexed (build artifacts, dependencies, generated code). Omit if there is nothing notable to exclude.",
+          "examples": "e.g., ['dist', 'node_modules', 'vendor']",
+          "validation_summary": "List of directory strings; combined length <= 1000 chars; blank clears.",
+          "requires_confirmation": false
+        },
+        {
+          "field_name": "exclude_file_extensions",
+          "is_set": false,
+          "current_value": [],
+          "guidance": "List file extensions worth excluding from indexing (minified bundles, source maps, lockfiles). Omit if none apply.",
+          "examples": "e.g., ['.min.js', '.map', '.lock']",
+          "validation_summary": "List of extension strings; combined length <= 1000 chars; blank clears.",
+          "requires_confirmation": false
+        }
+      ]
+    },
+    {
+      "key": "testing",
+      "title": "Testing",
+      "fields": [
+        {
+          "field_name": "unit_testing_stack",
+          "is_set": false,
+          "current_value": null,
+          "guidance": "Identify the unit-test runner from test config and dependencies (e.g. pytest, jest). Use a short human label. Omit when no unit-test stack is detectable.",
+          "examples": "e.g., 'Pytest', 'Jest + React Testing Library', 'Mocha + Chai'",
+          "validation_summary": "Free text up to 255 characters; blank clears the field.",
+          "requires_confirmation": false
+        },
+        {
+          "field_name": "e2e_testing_stack",
+          "is_set": false,
+          "current_value": null,
+          "guidance": "Identify the E2E framework from config and dependencies (e.g. Playwright, Cypress). Omit when no E2E suite is configured.",
+          "examples": "e.g., 'Playwright', 'Cypress', 'Jest with Puppeteer'",
+          "validation_summary": "Free text up to 255 characters; blank clears the field.",
+          "requires_confirmation": false
+        }
+      ]
+    },
+    {
+      "key": "automation_policy",
+      "title": "Automation policy",
+      "fields": [
+        {
+          "field_name": "selected_mcp_slugs",
+          "is_set": false,
+          "current_value": [],
+          "guidance": "Derive from platform/framework markers, then get explicit human confirmation: working_in 'Salesforce Commerce Cloud' or SFCC cartridges -> 'b2c-commerce-developer'; a Playwright config -> 'playwright-mcp'; PWA Kit markers -> 'pwa-kit-mcp'. Every slug must exist in the mcp_docs catalog. Submit ONLY as {value: [...], confirmed: true} after the human approves the proposed list; omit entirely when no manual clearly applies.",
+          "examples": "e.g., [\"b2c-commerce-developer\", \"playwright-mcp\", \"pwa-kit-mcp\"], or [] to clear",
+          "validation_summary": "JSON array of known mcp_docs slugs; unknown/duplicate/non-array rejected (HTTP 400).",
+          "requires_confirmation": true
+        },
+        {
+          "field_name": "learned_mcp_guidance",
+          "is_set": false,
+          "current_value": [],
+          "guidance": "Not a bootstrap field: repository-local MCP evidence can only come from the later confirmed local /learn-repository discovery flow (BAPI-1251) and cannot be inferred during static install bootstrap. Every value must be a non-blank string; server_key values must be unique; scope is limited to frontend, backend, or fullstack; entry order is preserved. Never supply credentials, tokens, private keys, or environment variable references in any field. Clear the field with [].",
+          "examples": "e.g., [] to clear, or [{\"server_key\": \"playwright\", \"label\": \"Playwright MCP\", \"guidance_markdown\": \"Prefer the accessibility snapshot over screenshots when locating elements.\", \"scope\": \"frontend\", \"evidence\": \"playwright.config.ts and the tests/e2e directory are present.\"}]",
+          "validation_summary": "JSON array of at most 20 {server_key, label, guidance_markdown, scope, evidence} objects; server_key/label <= 128 chars, guidance_markdown <= 8,000, evidence <= 4,000, 64,000 total; non-array, unknown/missing keys, blank or non-string values, bad scope, duplicate server_key, and credential-shaped text rejected (HTTP 400).",
+          "requires_confirmation": true
+        }
+      ]
+    }
+  ],
+  "deferred_fields": [
+    {
+      "field_name": "post_pr_target_status",
+      "tier": "scalar",
+      "description": "The Jira workflow status tickets transition to after code is committed via PR. Usually auto-resolved.",
+      "guidance": "Deferred: usually resolved automatically by the status resolver; set manually only to override."
+    },
+    {
+      "field_name": "ci_check_config",
+      "tier": "scalar",
+      "description": "Cached CI check configuration resolved by the CI resolver agent. Automatically populated.",
+      "guidance": "Deferred/server-managed: populated by resolve-ci-checks; do not set during install."
+    },
+    {
+      "field_name": "ci_followup_config",
+      "tier": "scalar",
+      "description": "Per-repo control field for the CI follow-up step in implement-ticket and check-ci-ticket pipelines. REPLACE-NOT-AUGMENT: when configured (non-NULL), this owns the CI follow-up step entirely and bypasses the baseline poll-only instruction behavior. When NULL, monitor-ci-checks.md falls back to poll-only defaults (max_iterations=1, max_minutes=10). Stored as JSON text with EXACTLY four keys: strategy, max_iterations, max_minutes, instructions. Unknown keys are rejected with HTTP 422. strategy must be one of 'poll_only' (preserve baseline polling, no fixes), 'fix_and_iterate' (self-contained correction loop), or 'custom' (instructions are the complete CI follow-up instruction set). max_iterations is an integer in [1, 10]. max_minutes is an integer in [1, 120]. Booleans are explicitly rejected for the integer fields. instructions is free-form prose up to 8192 UTF-8 bytes (byte-length, not character count). For strategy='fix_and_iterate', empty instructions is allowed and means the loop uses only structured CI failure signals. For strategy='custom', instructions must be non-empty (whitespace-only is rejected) and is the complete CI follow-up instruction set. Note: 'custom' instructions are authoritative for CI follow-up behavior, but they remain subject to normal tool approval, credential handling, secret-handling, and platform safety constraints — they cannot bypass approval gates, exfiltrate secrets, or otherwise override platform safety policies. Validation runs via the shared validate_ci_followup_config_value helper; valid payloads are persisted as canonical JSON via json.dumps.",
+      "guidance": "Deferred policy field: configure the CI follow-up loop intentionally; not a bootstrap field."
+    },
+    {
+      "field_name": "epic_ci_repair_guidance",
+      "tier": "scalar",
+      "description": "Optional plain prose with repository-specific advice for Epic Implementer CI repair (for example how this repository's CI checks relate to local commands). It is added to every CI repair job as untrusted reference material, so it cannot change scope, which checks gate, or verification, commit, and push policy. Up to 8192 UTF-8 bytes, measured on the submitted text and again after secret redaction; oversized or malformed text is rejected, never cut. An empty or whitespace-only value clears the field to NULL.",
+      "guidance": "Deferred owner-written field: install must not derive or set it. Owner-provided advice cannot alter scope, gate membership, verification, commit, or push policy."
+    },
+    {
+      "field_name": "allowed_providers",
+      "tier": "scalar",
+      "description": "List of LLM providers permitted for this project, in addition to the primary provider. Accepts a comma-separated string. If empty or null, the project requests its PRIMARY provider only -- it does not mean all providers are allowed. Every provider must be one the owning account's subscription plan entitles.",
+      "guidance": "Deferred policy field: restricts which providers automations may use; not a bootstrap field."
+    },
+    {
+      "field_name": "allow_mutating_smoke_ops",
+      "tier": "scalar",
+      "description": "Scalar boolean gating whether the final plan reviewer may plan mutating smoke-verification steps against local/ephemeral state only. Accepts a JSON boolean or 'true'/'false'.",
+      "guidance": "Deferred policy field: enable mutating smoke verification intentionally; not a bootstrap field."
+    },
+    {
+      "field_name": "disable_sfcc_mcp_awareness",
+      "tier": "scalar",
+      "description": "Nullable boolean opting this repository OUT of Bridge SFCC MCP tool awareness during plan generation and final review. Unset (null) and false both ALLOW awareness — enabling is the default for SFCC platforms, because SFCC tool availability cannot be detected server-side and is therefore assumed. Only the explicit value true disables it, which also suppresses the deterministic SFCC setup-documentation referral. Has no effect on non-SFCC projects, where awareness is already off structurally. Accepts a JSON boolean, 'true'/'false', or blank to clear back to null.",
+      "guidance": "Deferred policy field: set to true only when a repo should never be offered Bridge's SFCC metadata tooling; not a bootstrap field."
+    },
+    {
+      "field_name": "enable_regression_checks",
+      "tier": "scalar",
+      "description": "Scalar boolean gating whether the jira-ticket-writer agent's non-blocking regression-completeness pass runs when drafting a ticket. The writer never resolves this field itself — the calling command/instruction (/write-ticket, draft-and-critique) resolves it once during setup and passes the normalized result into the writer's prompt. Accepts a JSON boolean or 'true'/'false'.",
+      "guidance": "Deferred policy field: enable the ticket-writer's regression-completeness pass intentionally; not a bootstrap field."
+    },
+    {
+      "field_name": "epic_implementer_test_commands",
+      "tier": "scalar",
+      "description": "Ordered JSON array of one to four plain test commands (single argv, no shell) that Epic Implementer should try as the repository's local test gate. Saving replaces the whole list and records who saved it; there is no clearing operation. Saving does not change the active gate: a command takes effect only after it passes a clean-checkout trial run. Supported by the Claude Code Epic Implementer.",
+      "guidance": "Submit the commands that run the repository's unit tests from a clean checkout after the declared installs. Use plain commands only; shell syntax is rejected. The whole list is replaced on every write."
+    },
+    {
+      "field_name": "difficulty_model_routing_enabled",
+      "tier": "scalar",
+      "description": "Scalar boolean enabling difficulty-based /start-tickets implementation-model routing (default ON). Accepts a JSON boolean or 'true'/'false'.",
+      "guidance": "Deferred policy field: toggles difficulty-based model routing; not a bootstrap field."
+    },
+    {
+      "field_name": "embeddings_observability_enabled",
+      "tier": "scalar",
+      "description": "Scalar boolean enabling Langfuse trace generation for OpenAI embeddings API calls (default OFF). When true, create_single_embedding and create_batch_embeddings wrap the embeddings.create() call in a Langfuse generation and record token usage. Gated per-repo to keep trace volume and ingestion cost controllable and reversible.",
+      "guidance": "Deferred policy field: enable embeddings observability deliberately; not a bootstrap field."
+    },
+    {
+      "field_name": "difficulty_model_tier_overrides",
+      "tier": "scalar",
+      "description": "JSON object mapping tier names ('cheap'/'basic'/'premium') to per-repo model aliases. Only those three keys are allowed. Stored as JSONB.",
+      "guidance": "Deferred policy field: override model tier aliases deliberately; not a bootstrap field."
+    },
+    {
+      "field_name": "sfcc_log_filter_rules",
+      "tier": "scalar",
+      "description": "BAPI-555 SFCC Log Monitor filter-rule overlay: a JSON array of {type, match, value, priority} rules the T3 filtering engine merges OVER its shipped conservative defaults (defaults are never replaced). type is 'include' or 'exclude'; match is one of level/regex/logger/log-type/keyword/prefix; value is a non-blank string; priority is a strict integer (booleans rejected). 'prefix' rules are fetch-time controls (which WebDAV files may be pulled), the other five classify already-normalized entries. Unknown keys, unsupported enum values, blank values, malformed prefixes, and non-compilable regexes are rejected (HTTP 422). An empty array clears the overlay (defaults only). Stored as JSONB.",
+      "guidance": "Deferred policy field: tune SFCC log filtering deliberately; not a bootstrap field."
+    },
+    {
+      "field_name": "sfcc_log_monitor_enabled",
+      "tier": "scalar",
+      "description": "BAPI-557 scalar boolean gating the per-repo SFCC Log Monitor scheduled job (pulls the last-24h WebDAV log window, redacts, filters, and persists only high-signal findings — never raw logs). Ships dark (default OFF): the daily job registers and runs only when this is true. Accepts a JSON boolean or 'true'/'false'.",
+      "guidance": "Deferred policy field: enable the SFCC Log Monitor deliberately; not a bootstrap field."
+    },
+    {
+      "field_name": "planner_file_overlap_serialization_enabled",
+      "tier": "scalar",
+      "description": "Scalar boolean gating deterministic plan-time serialization of sibling tickets with overlapping predicted touched files (BAPI-495). When on, overlapping siblings gain a depends_on/edge on each other before the plan DAG is validated, hashed, and stored, so they never dispatch in parallel, while siblings with disjoint files stay parallel. Enabled by default (BAPI-677, migration 0126). A node that OMITS touched_files opts out of this optimization and is accepted (BAPI-722); a node that declares it malformed is still rejected with an actionable 400. This is best-effort plan-time scheduling metadata, never the correctness boundary: BAPI-1151 added a head-bound check of the ACTUAL changed files at merge admission, which holds two overlapping children apart whether or not anyone predicted the shared file. Set false to opt this repo out. Accepts a JSON boolean or 'true'/'false'.",
+      "guidance": "On by default: overlapping siblings are serialized deterministically at plan store, and every plan node must declare touched_files ([] when none). Set false only to opt this repo out."
+    },
+    {
+      "field_name": "jira_ticket_key",
+      "tier": "scalar",
+      "description": "The ticket key prefix for this repository. In jira mode this is the Jira project key; in local mode (ticket_backend_mode='local') it is the mint prefix for locally-created tickets (e.g. prefix 'ABC' mints 'ABC-1', 'ABC-2'). Local mode REQUIRES this to be set or every ticket creation fails.",
+      "guidance": "Set this to the repository's ticket prefix. It is REQUIRED before creating tickets in local mode. It is immutable once local tickets exist, and a prefix already used by another repository cannot be adopted."
+    },
+    {
+      "field_name": "ticket_backend_mode",
+      "tier": "scalar",
+      "description": "The per-repository ticket backend mode. When unset, Bridge treats the repository as jira mode.",
+      "guidance": "Deferred/server-side operational field: set to 'local' only when the repository should use Bridge Postgres as the ticket source of truth; leave unset or set to 'jira' for existing Jira-backed behavior."
+    },
+    {
+      "field_name": "optimization_posture",
+      "tier": "scalar",
+      "description": "The per-repository optimization posture (BAPI-1220): 'quality' (the effective default), 'speed', or 'maximize_subscription'. Stored NULL is treated server-side as 'quality' by the sole resolver, resolve_optimization_posture. Inert in this ticket — no model, effort, or subscription decision path reads it yet; that wiring is deferred to later slices.",
+      "guidance": "Deferred policy field with no behavioral effect yet: set only from an explicit operator or install-time choice; not a bootstrap field. Stored NULL is distinct from, but resolves identically to, the explicit 'quality' value. Has no behavioral effect until S3-S5 wire it into model, effort, and subscription decision paths."
+    },
+    {
+      "field_name": "stack_detection_mode",
+      "tier": "scalar",
+      "description": "The per-repository generic stack-detection mode. When unset, Bridge resolves a platform-aware default: off for a specially supported version (the SFCC family and Salesforce Core), and on for every other stack, including python.",
+      "guidance": "Deferred/server-side operational field: leave it unset so the platform-aware default applies. Set it only to override that default for one repository — 'off' to hold a repository on the legacy per-framework labeler, 'shadow' to let detection run and be measured while legacy labeling stays authoritative, 'on' to let detected stack information become authoritative. 'on' is refused for a specially supported version, which has its own labeler. 'off' and 'shadow' are refused for a python repository, whose legacy labeler was removed once it moved to the generic path. Do NOT infer or write this during install."
+    },
+    {
+      "field_name": "ai_automation_level",
+      "tier": "scalar",
+      "description": "Optional estimator calibration: the team's AI-automation level, used to scale the estimator's default time ranges at read time. NULL uses the moderate-AI baseline (the same as 'medium'); 'low' widens estimates (more manual work), 'high' shrinks them.",
+      "guidance": "Optional estimator calibration field. Do NOT infer or write this during zero-config install in v1 — leave it unset so the moderate-AI baseline applies. Set it only when a human explicitly calibrates the team's AI-automation level."
+    },
+    {
+      "field_name": "review_instructions",
+      "tier": "instruction",
+      "description": "Custom instructions for the AI code reviewer, injected into the review prompt.",
+      "guidance": "Deferred (instruction tier): owned by learn-repository / setup UI; not a bootstrap field."
+    },
+    {
+      "field_name": "documentation_instructions",
+      "tier": "instruction",
+      "description": "A single concise prose paragraph (under 1,500 characters) telling the planner how to document an implemented change. It is inlined verbatim into the deterministic documentation plan step, so it must be one paragraph with no markdown headings, bullets, numbered lists, or intentional blank lines. The paragraph must cover the implementation-document file naming convention, where documentation lives, the key content to capture, and when to skip documentation.",
+      "guidance": "Deferred (instruction tier): owned by learn-repository / setup UI; not a bootstrap field."
+    },
+    {
+      "field_name": "architecture_instructions",
+      "tier": "instruction",
+      "description": "Architecture guidelines and patterns for the repository, used by planners and reviewers.",
+      "guidance": "Deferred (instruction tier): owned by learn-repository / setup UI; not a bootstrap field."
+    },
+    {
+      "field_name": "tdd_document_instructions",
+      "tier": "instruction",
+      "description": "Custom STRUCTURE and FORMAT for the generated Technical Design Document (TDD). When set, replaces the default TDD response-format sections verbatim. Leave blank for the built-in default.",
+      "guidance": "Deferred (instruction tier): document-format override; not a bootstrap field."
+    },
+    {
+      "field_name": "fsd_document_instructions",
+      "tier": "instruction",
+      "description": "Custom STRUCTURE and FORMAT for the generated Functional Specification Document (FSD). When set, replaces the default FSD response-format sections verbatim. Leave blank for the default.",
+      "guidance": "Deferred (instruction tier): document-format override; not a bootstrap field."
+    },
+    {
+      "field_name": "prd_document_instructions",
+      "tier": "instruction",
+      "description": "Custom STRUCTURE and FORMAT for the generated Product Requirements Document (PRD). When set, a non-blank value replaces the default PRD response-format sections verbatim; blank/null restores the built-in DEFAULT_PRD_FORMAT.",
+      "guidance": "Deferred (instruction tier): document-format override; not a bootstrap field."
+    },
+    {
+      "field_name": "unit_testing_instructions",
+      "tier": "instruction",
+      "description": "Detailed instructions and guidelines for unit testing in this repository.",
+      "guidance": "Deferred (instruction tier): owned by learn-repository / setup UI; not a bootstrap field."
+    },
+    {
+      "field_name": "e2e_testing_instructions",
+      "tier": "instruction",
+      "description": "Detailed instructions and guidelines for end-to-end testing in this repository.",
+      "guidance": "Deferred (instruction tier): owned by learn-repository / setup UI; not a bootstrap field."
+    },
+    {
+      "field_name": "design_principles",
+      "tier": "instruction",
+      "description": "Frontend design principles and visual language guidelines for the repository. Describes the project's design tokens, component inventory, layout patterns, and composition rules to guide AI-generated UI. This column is also written by the learn-repository / Optimize pipeline as well as the Project Configuration page; no locking or merge behavior is applied, so the most recent writer wins (last-write-wins).",
+      "guidance": "Deferred (instruction tier): owned by learn-repository / setup UI; not a bootstrap field."
+    },
+    {
+      "field_name": "frontend_correctness_standards",
+      "tier": "instruction",
+      "description": "Correctness standards for frontend code. Guides AI-generated code, and when the code reviewer's Code Correctness check is enabled, also provides evidence the reviewer cites in PR findings. A blank value does not disable the correctness check — it only means this category has no standards to cite.",
+      "guidance": "Deferred (instruction tier): owned by learn-repository / setup UI; not a bootstrap field."
+    },
+    {
+      "field_name": "backend_correctness_standards",
+      "tier": "instruction",
+      "description": "Correctness standards for backend code. Guides AI-generated code, and when the code reviewer's Code Correctness check is enabled, also provides evidence the reviewer cites in PR findings. A blank value does not disable the correctness check — it only means this category has no standards to cite.",
+      "guidance": "Deferred (instruction tier): owned by learn-repository / setup UI; not a bootstrap field."
+    },
+    {
+      "field_name": "template_correctness_standards",
+      "tier": "instruction",
+      "description": "Correctness standards for template files (Jinja2, ISML, Handlebars). Guides AI-generated code, and when the code reviewer's Code Correctness check is enabled, also provides evidence the reviewer cites in PR findings. A blank value does not disable the correctness check — it only means this category has no standards to cite.",
+      "guidance": "Deferred (instruction tier): owned by learn-repository / setup UI; not a bootstrap field."
+    },
+    {
+      "field_name": "style_correctness_standards",
+      "tier": "instruction",
+      "description": "Style and formatting standards for CSS/SCSS/styling files. Guides AI-generated code, and when the code reviewer's Code Correctness check is enabled, also provides evidence the reviewer cites in PR findings. A blank value does not disable the correctness check — it only means this category has no standards to cite.",
+      "guidance": "Deferred (instruction tier): owned by learn-repository / setup UI; not a bootstrap field."
+    },
+    {
+      "field_name": "ticket_correctness_standards",
+      "tier": "instruction",
+      "description": "Format and quality preferences for tickets drafted by jira-ticket-writer. A blank value uses Bridge's built-in default. Bridge-dependent ticket-contract elements remain fixed.",
+      "guidance": "Set only through the optional interview in the client-side /learn-repository flow, or by hand on the Project Configuration page. This standard is interview-only in /learn-repository: it is never researched or derived from the codebase. A blank value means the writer uses its built-in default."
+    },
+    {
+      "field_name": "critical_priorities",
+      "tier": "instruction",
+      "description": "The critical priorities pull requests are reviewed against by the code reviewer.",
+      "guidance": "Deferred (instruction tier): owned by learn-repository / setup UI; not a bootstrap field."
+    },
+    {
+      "field_name": "check_critical_priorities",
+      "tier": "scalar",
+      "description": "Scalar boolean independently enabling the code reviewer's critical-priorities check (default OFF). Accepts a JSON boolean or 'true'/'false'.",
+      "guidance": "Deferred policy field: enable the critical-priorities check deliberately; not a bootstrap field."
+    },
+    {
+      "field_name": "check_code_correctness",
+      "tier": "scalar",
+      "description": "Scalar boolean independently enabling the code reviewer's general-purpose code-correctness check — bug-finding and engineering correctness, judged against the four *_correctness_standards fields when configured (default OFF). Accepts a JSON boolean or 'true'/'false'.",
+      "guidance": "Deferred policy field: enable the code-correctness check deliberately; not a bootstrap field."
+    }
+  ],
+  "next_step": {
+    "command": "/learn-repository",
+    "command_context": "Running /learn-repository grounds Bridge's reviews and plans in your codebase and its best practices. It runs unattended and usually takes 15–30 minutes.",
+    "post_install_indexing": "Indexing starts automatically — no prompt, no consent question, no manual tool call. The moment this repository reaches full parse readiness (VCS credentials, the Pinecone index, working_in / project_description, and SFCC prerequisites where applicable), the existing readiness-gated funnel (maybe_auto_parse_if_ready) enqueues exactly one first parse, scoped by the applied exclude_directories / custom_directories. The same funnel backs GitHub connection-confirm, every setup save, and the scheduled sweep backstop, so indexing is guaranteed eventually without anyone asking for it. Never call the parse_repository tool or present /parse-repository as an install continuation — that decision belongs entirely to the funnel, not to this session.",
+    "post_install_scheduler": "Nothing needs to be scheduled after install. Epic Implementer runs are driven by the server-side reconciler. If you want a general health check, 'npx -y @bridge_gpt/mcp-server epic-implementer doctor' is an optional diagnostic."
+  },
+  "done_criteria": "Install bootstrap is complete when every applicable bootstrap field is either set or intentionally left unset, and the deferred (learn-repository / policy) fields have been reviewed. Indexing starts automatically once the repository reaches full parse readiness — never ask for consent, call parse_repository, or present /parse-repository as a next step; the readiness-gated funnel and the scheduled sweep backstop already guarantee it. Review the manifest's integrations checklist: for each unconfigured item, follow its setup_instructions (install URL, ordered steps, and how to find any required id) — credentials are configured by a human in the setup UI — never through the agent.",
+  "command_contract_version": 10,
+  "snapshot_token": "eyJpc3N1ZWRfYXQiOiIyMDI2LTExLTE2VDIxOjQzOjUyLjI3NzQzNCswMDowMCIsInJlcG9fbmFtZSI6InJhbGx5LW5leHRqcy1ydW4xIiwic3RhdGUiOnsiYmFzZV9icmFuY2giOnsiaXNfc2V0Ijp0cnVlLCJ2YWx1ZV9oYXNoIjoiZTRhOWU0ZDhiYWE3MWE5ZDhlYmY1NmVjOGFlM2VhMWU4MmJlOWY5NmFlNmZlODllMzZkNzAxZDRhNTMzN2YzMCJ9LCJjdXN0b21fZGlyZWN0b3JpZXMiOnsiaXNfc2V0IjpmYWxzZSwidmFsdWVfaGFzaCI6Ijc0MjM0ZTk4YWZlNzQ5OGZiNWRhZjFmMzZhYzJkNzhhY2MzMzk0NjRmOTUwNzAzYjhjMDE5ODkyZjk4MmI5MGIifSwiZTJlX3Rlc3Rpbmdfc3RhY2siOnsiaXNfc2V0IjpmYWxzZSwidmFsdWVfaGFzaCI6Ijc0MjM0ZTk4YWZlNzQ5OGZiNWRhZjFmMzZhYzJkNzhhY2MzMzk0NjRmOTUwNzAzYjhjMDE5ODkyZjk4MmI5MGIifSwiZXhjbHVkZV9kaXJlY3RvcmllcyI6eyJpc19zZXQiOmZhbHNlLCJ2YWx1ZV9oYXNoIjoiNGY1M2NkYTE4YzJiYWEwYzAzNTRiYjVmOWEzZWNiZTVlZDEyYWI0ZDhlMTFiYTg3M2MyZjExMTYxMjAyYjk0NSJ9LCJleGNsdWRlX2ZpbGVfZXh0ZW5zaW9ucyI6eyJpc19zZXQiOmZhbHNlLCJ2YWx1ZV9oYXNoIjoiNGY1M2NkYTE4YzJiYWEwYzAzNTRiYjVmOWEzZWNiZTVlZDEyYWI0ZDhlMTFiYTg3M2MyZjExMTYxMjAyYjk0NSJ9LCJncmVlbmZpZWxkX3NldHVwX3BhdGgiOnsiaXNfc2V0IjpmYWxzZSwidmFsdWVfaGFzaCI6Ijc0MjM0ZTk4YWZlNzQ5OGZiNWRhZjFmMzZhYzJkNzhhY2MzMzk0NjRmOTUwNzAzYjhjMDE5ODkyZjk4MmI5MGIifSwibGVhcm5lZF9tY3BfZ3VpZGFuY2UiOnsiaXNfc2V0IjpmYWxzZSwidmFsdWVfaGFzaCI6IjRmNTNjZGExOGMyYmFhMGMwMzU0YmI1ZjlhM2VjYmU1ZWQxMmFiNGQ4ZTExYmE4NzNjMmYxMTE2MTIwMmI5NDUifSwicHJvamVjdF9kZXNjcmlwdGlvbiI6eyJpc19zZXQiOmZhbHNlLCJ2YWx1ZV9oYXNoIjoiNzQyMzRlOThhZmU3NDk4ZmI1ZGFmMWYzNmFjMmQ3OGFjYzMzOTQ2NGY5NTA3MDNiOGMwMTk4OTJmOTgyYjkwYiJ9LCJzZWxlY3RlZF9tY3Bfc2x1Z3MiOnsiaXNfc2V0IjpmYWxzZSwidmFsdWVfaGFzaCI6IjRmNTNjZGExOGMyYmFhMGMwMzU0YmI1ZjlhM2VjYmU1ZWQxMmFiNGQ4ZTExYmE4NzNjMmYxMTE2MTIwMmI5NDUifSwidW5pdF90ZXN0aW5nX3N0YWNrIjp7ImlzX3NldCI6ZmFsc2UsInZhbHVlX2hhc2giOiI3NDIzNGU5OGFmZTc0OThmYjVkYWYxZjM2YWMyZDc4YWNjMzM5NDY0Zjk1MDcwM2I4YzAxOTg5MmY5ODJiOTBiIn0sInZlcnNpb24iOnsiaXNfc2V0IjpmYWxzZSwidmFsdWVfaGFzaCI6Ijc0MjM0ZTk4YWZlNzQ5OGZiNWRhZjFmMzZhYzJkNzhhY2MzMzk0NjRmOTUwNzAzYjhjMDE5ODkyZjk4MmI5MGIifSwidmVyc2lvbl9jb250cm9sX3N5c3RlbSI6eyJpc19zZXQiOmZhbHNlLCJ2YWx1ZV9oYXNoIjoiNzQyMzRlOThhZmU3NDk4ZmI1ZGFmMWYzNmFjMmQ3OGFjYzMzOTQ2NGY5NTA3MDNiOGMwMTk4OTJmOTgyYjkwYiJ9LCJ3b3JraW5nX2luIjp7ImlzX3NldCI6ZmFsc2UsInZhbHVlX2hhc2giOiI3NDIzNGU5OGFmZTc0OThmYjVkYWYxZjM2YWMyZDc4YWNjMzM5NDY0Zjk1MDcwM2I4YzAxOTg5MmY5ODJiOTBiIn19LCJ2ZXJzaW9uIjoxfQ.LxTOp2nVJep4z8mHLnt-Blcjkcw28SmusLPG-B8Ry_U",
+  "integrations": [
+    {
+      "id": "jira",
+      "label": "Jira API access",
+      "is_configured": true,
+      "required_for": [
+        "ticket reads/writes",
+        "estimation and review automations",
+        "status transitions"
+      ],
+      "configure_in": "Setup UI → project settings (integration credentials are entered by a human; Bridge API never accepts them through an agent or MCP tool)",
+      "setup_instructions": {
+        "install_url": "https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/#Create-an-API-token",
+        "steps": [
+          "Create a Jira API token in the Atlassian admin/account panel: https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/#Create-an-API-token",
+          "Get the root URL of your Jira instance from the URL of any Jira ticket — for example, https://bridge-test.atlassian.net/browse/BAPI-1 has the root URL https://bridge-test.atlassian.net.",
+          "Use the email of the Jira user Bridge should act as — this is the account Bridge uses to write comments and attach documents to tickets."
+        ],
+        "how_to_find_id": "The Jira root URL is the part of any ticket URL before '/browse/...'. The Jira email is the account/user Bridge writes comments and attaches documents as — not a value to look up, but a user you designate."
+      }
+    },
+    {
+      "id": "github_app",
+      "label": "GitHub App installation",
+      "is_configured": true,
+      "required_for": [
+        "pull request creation",
+        "code review",
+        "repository parsing of private repos"
+      ],
+      "configure_in": "Run `npx -y @bridge_gpt/mcp-server@latest connect-github --repo <repo_name>` in your terminal (opens GitHub in your browser to install the app; Bridge API never accepts GitHub credentials through an agent or MCP tool)",
+      "setup_instructions": {
+        "install_url": "https://github.com/apps/bridge-gpt-ai-tools-for-sfcc/installations/new",
+        "steps": [
+          "Recommended — connect from your terminal: run `npx -y @bridge_gpt/mcp-server@latest connect-github --repo <repo_name>`. It opens a Bridge connect page in your browser: you sign in to GitHub, choose or install the GitHub App installation, and confirm. Bridge connects only repositories you can change on GitHub (push, maintain, or admin). Then you return to the terminal and confirm which repository to connect. You are never asked for a GitHub token, password, or installation ID — you authenticate to GitHub in the browser, and Bridge never keeps a GitHub credential.",
+          "If someone else administers the GitHub organization, use the delegated handoff: run `npx -y @bridge_gpt/mcp-server@latest connect-github --handoff --repo <repo_name>` to print a shareable link (valid 72 hours, admins only, --repo required), send it to them, and once they say they are done run `connect-github --resume --repo <repo_name>` from any machine holding this project's API key to finish. They need only the link, a browser, and write access to a repository on GitHub — no Bridge account, API key, or CLI. They sign in to GitHub and confirm before anything is staged. Use `connect-github --revoke` to invalidate a link; minting a new one does not invalidate an outstanding one.",
+          "If an organization owns the repository and you are not an owner, GitHub will send an approval request instead of installing. That approval happens on GitHub and does not return to the terminal, so the command cannot wait for it. With a delegated handoff the link stays live until it expires and `connect-github --resume` reports 'awaiting organization approval' until an owner approves. Once it is approved, or if the app is already installed, run the command (or use the link) again: after GitHub sign-in, the connect page lists the installations where you can change a repository.",
+          "The manual Installation ID fallback is retired: the Setup page no longer accepts a new installation ID or a different repository for a GitHub App connection. It keeps the stored values and lets you disconnect by clearing both together.",
+          "No review webhook to create: an installed repository receives pull-request events through the GitHub App webhook, so code review starts working as soon as the app is installed. There is no per-repository webhook secret for GitHub."
+        ],
+        "how_to_find_id": "The Installation ID is the trailing numeric segment of the GitHub App installation URL under Organization Settings → Third-party Access → GitHub Apps (e.g. the '61661616' in '.../settings/installations/61661616')."
+      },
+      "optional_components": [
+        {
+          "id": "vcs_webhook",
+          "label": "VCS webhook secret (Bitbucket, or a legacy GitHub hook)",
+          "is_configured": false,
+          "required_for": [
+            "Bitbucket code-review webhooks",
+            "legacy hand-created GitHub webhooks (a GitHub App repository needs no webhook secret)"
+          ],
+          "configure_in": "Setup UI → project settings (integration credentials are entered by a human; Bridge API never accepts them through an agent or MCP tool)",
+          "gating": false
+        }
+      ]
+    },
+    {
+      "id": "vcs_access_token",
+      "label": "VCS access token",
+      "is_configured": false,
+      "required_for": [
+        "pull request creation",
+        "code review",
+        "repository parsing of private repos"
+      ],
+      "configure_in": "Run `npx -y @bridge_gpt/mcp-server@latest connect-bitbucket --repo <repo_name>` in your terminal (opens Bitbucket in your browser to install the Forge app; Bridge API never accepts VCS credentials through an agent or MCP tool)",
+      "setup_instructions": {
+        "install_url": null,
+        "steps": [
+          "Create an access token: repository Settings → Security → Access Token → Create access token. Name can be anything (the AI comments under that name). Set expiry to None or far into the future. Scopes: Repositories: Read, Pull requests: Read & Write, Webhooks: Read & Write.",
+          "Record the token somewhere safe — you will need it to complete setup.",
+          "Get the Repository ID: Repositories → open the repository → Repository settings → Repository details → the Repository name field is the Repository ID.",
+          "Get the Workspace ID: account menu (top right) → All workspaces → find the workspace → Manage → read the Workspace ID field.",
+          "Create an integration user that will comment on pull requests and interact with Bitbucket as the AI, then log in as that user and note the 'username' field on that user's Bitbucket account settings page.",
+          "Create an app password for the integration user (App passwords in the left panel → Create app password), granting access to pull requests and repositories, and save the app password you receive."
+        ],
+        "how_to_find_id": "The Repository ID is the Repository name field under Repository settings → Repository details. The Workspace ID is under the account menu → All workspaces → Manage. The username is the 'username' field on the integration user's Bitbucket account settings page."
+      }
+    }
+  ],
+  "configured": false,
+  "learned": false,
+  "indexed": false,
+  "tool_capabilities": [
+    {
+      "id": "tier1",
+      "name": "Regularly useful",
+      "description": "The tools worth knowing for most tickets.",
+      "tools": [
+        {
+          "tool": "request_ticket_review",
+          "display_name": "Review Ticket",
+          "description": "Runs a full quality review of a ticket: clarifying questions and a critique plus an alternate-model second opinion, then evaluates the findings and produces a decision page for accepting or rejecting them.",
+          "how_to_use": "`/review-tickets BAPI-123` (command only — \"review\" as free text is easily mistaken for a freehand agent review). A single key reviews inline in the current session — no terminal tab, no worktree. For several tickets at once, `/review-tickets BAPI-123 BAPI-456` opens one terminal tab per ticket and reviews them in parallel with no worktrees; every review flag applies, and `--review KEY=auto,rounds=N` sets per-ticket overrides.",
+          "retrieval_of": null,
+          "group": "tier1",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": "DEGRADE",
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "request_council",
+          "display_name": "AI Council",
+          "description": "Fans your problem out to two different models and returns their approaches, in technical, design, discovery, or general mode.",
+          "how_to_use": "`/ai-council <question>`",
+          "retrieval_of": null,
+          "group": "tier1",
+          "profile": "core",
+          "availability": "varies_by_variant",
+          "availability_text": "Availability depends on which option you choose.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": [
+            {
+              "variant": "technical",
+              "label": "Technical mode",
+              "availability": "available_after_dependencies",
+              "availability_text": "Available once you index your repository.",
+              "effect": "BLOCK",
+              "missing": [
+                "code_index"
+              ],
+              "semantics": "all_of"
+            },
+            {
+              "variant": "discovery",
+              "label": "Discovery mode",
+              "availability": "available_after_dependencies",
+              "availability_text": "Available once you index your repository.",
+              "effect": "BLOCK",
+              "missing": [
+                "code_index"
+              ],
+              "semantics": "all_of"
+            },
+            {
+              "variant": "design",
+              "label": "Design mode",
+              "availability": "available_now",
+              "availability_text": "Available now.",
+              "effect": null,
+              "missing": [],
+              "semantics": "all_of"
+            },
+            {
+              "variant": "general",
+              "label": "General mode",
+              "availability": "available_now",
+              "availability_text": "Available now.",
+              "effect": null,
+              "missing": [],
+              "semantics": "all_of"
+            }
+          ]
+        },
+        {
+          "tool": "request_deep_research",
+          "display_name": "Deep Research",
+          "description": "Runs multi-source, fact-checked web research on a technical topic and returns a cited report.",
+          "how_to_use": "`/bridge-research <question>`",
+          "retrieval_of": null,
+          "group": "tier1",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        }
+      ]
+    },
+    {
+      "id": "tier2",
+      "name": "Occasionally useful",
+      "description": "Good to know, but not needed every day.",
+      "tools": [
+        {
+          "tool": "create_ticket",
+          "display_name": "Upload Ticket",
+          "description": "Creates a real Jira issue from a drafted ticket, including child tickets under an epic; your agent should confirm with you before creating it.",
+          "how_to_use": "Ask your agent to create the ticket; it should confirm with you before creating the live issue.",
+          "retrieval_of": null,
+          "group": "tier2",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "request_plan_generation",
+          "display_name": "Plan Ticket",
+          "description": "Writes a step-by-step plan for a ticket that points at the real files to change.",
+          "how_to_use": "`/plan-ticket BAPI-123`",
+          "retrieval_of": null,
+          "group": "tier2",
+          "profile": "core",
+          "availability": "available_after_dependencies",
+          "availability_text": "Available once you index your repository.",
+          "effect": "BLOCK",
+          "missing": [
+            "code_index"
+          ],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "create_doc",
+          "display_name": "Create Doc",
+          "description": "Generates a design document for a ticket — a technical design document, a functional spec, or a product requirements document.",
+          "how_to_use": "`/create-doc BAPI-123 --doc-type tdd` (or `fsd` / `prd`)",
+          "retrieval_of": null,
+          "group": "tier2",
+          "profile": "core",
+          "availability": "varies_by_variant",
+          "availability_text": "Availability depends on which option you choose.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": [
+            {
+              "variant": "tdd",
+              "label": "Technical design document",
+              "availability": "available_after_dependencies",
+              "availability_text": "Available once you index your repository.",
+              "effect": "BLOCK",
+              "missing": [
+                "code_index"
+              ],
+              "semantics": "all_of"
+            },
+            {
+              "variant": "fsd",
+              "label": "Functional specification",
+              "availability": "available_now",
+              "availability_text": "Available now.",
+              "effect": "DEGRADE",
+              "missing": [],
+              "semantics": "all_of"
+            },
+            {
+              "variant": "prd",
+              "label": "Product requirements document",
+              "availability": "available_now",
+              "availability_text": "Available now.",
+              "effect": "DEGRADE",
+              "missing": [],
+              "semantics": "all_of"
+            }
+          ]
+        },
+        {
+          "tool": "second_opinion",
+          "display_name": "Second Opinion",
+          "description": "Gets an immediate critique of any text from a different model family, without saving an artifact.",
+          "how_to_use": "Ask your agent — \"Get a second opinion from Gemini on whether the BAPI-123 plan's migration step is safe to run against production.\"",
+          "retrieval_of": null,
+          "group": "tier2",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "generate_image",
+          "display_name": "Generate Image",
+          "description": "Generates an image from a text prompt using a provider image model, spending provider credits on every call.",
+          "how_to_use": "Ask your agent — \"Generate an image of a dashboard showing SOC2 evidence freshness as a traffic-light grid.\"",
+          "retrieval_of": null,
+          "group": "tier2",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        }
+      ]
+    },
+    {
+      "id": "tier3",
+      "name": "Now and then",
+      "description": "Useful once in a while.",
+      "tools": [
+        {
+          "tool": "request_reimplement_context",
+          "display_name": "Reimplement Ticket",
+          "description": "Gathers the context and attachments added since the last pass so a targeted follow-up change can be made.",
+          "how_to_use": "`/reimplement-ticket BAPI-123`",
+          "retrieval_of": null,
+          "group": "tier3",
+          "profile": "core",
+          "availability": "available_after_dependencies",
+          "availability_text": "Available once you index your repository.",
+          "effect": "BLOCK",
+          "missing": [
+            "code_index"
+          ],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "update_ticket_description",
+          "display_name": "Update Ticket",
+          "description": "Rewrites a ticket's description, fully replacing what is there today.",
+          "how_to_use": "Ask your agent — \"Replace BAPI-123's description with: <new text>.\" It fully overwrites the live description, which is hard to reverse.",
+          "retrieval_of": null,
+          "group": "tier3",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "get_ticket",
+          "display_name": "Get Ticket",
+          "description": "Retrieves the full details of a ticket, including its summary, status, and description, and optionally the model tier its difficulty routes to.",
+          "how_to_use": "Ask your agent — \"Pull up BAPI-123 and show me its description, status, and acceptance criteria.\"",
+          "retrieval_of": null,
+          "group": "tier3",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "get_tickets",
+          "display_name": "Search Tickets",
+          "description": "Searches across the tickets in your project.",
+          "how_to_use": "Ask your agent — \"Search our project for open tickets mentioning rate limiting.\"",
+          "retrieval_of": null,
+          "group": "tier3",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "add_comment",
+          "display_name": "Write Comment",
+          "description": "Posts a comment on a ticket.",
+          "how_to_use": "Ask your agent — \"Post a comment on BAPI-123: blocked on the expired Atlassian token — will retry after it is rotated.\"",
+          "retrieval_of": null,
+          "group": "tier3",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "report_mcp_bug",
+          "display_name": "Report MCP Bug",
+          "description": "Reports a Bridge MCP failure; after receipt, a response and apology will follow. Never include secrets, PII, or proprietary code.",
+          "how_to_use": "Ask your agent to report the failed MCP tool, with no secrets, PII, or proprietary code.",
+          "retrieval_of": null,
+          "group": "tier3",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "get_comments",
+          "display_name": "Read Comments",
+          "description": "Reads the comment thread on a ticket.",
+          "how_to_use": "Ask your agent — \"Read the comments on BAPI-123 and summarize what was decided.\"",
+          "retrieval_of": null,
+          "group": "tier3",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "attachment",
+          "display_name": "Ticket Attachments",
+          "description": "Downloads files from a ticket to your disk, or attaches a local file to a ticket.",
+          "how_to_use": "Ask your agent — \"Download the design mockups attached to BAPI-123 into my docs folder,\" or \"Attach build-log.txt to BAPI-123.\"",
+          "retrieval_of": null,
+          "group": "tier3",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "estimate_epic",
+          "display_name": "Estimate Epic",
+          "description": "Estimates an epic, or an explicit group of tickets you name.",
+          "how_to_use": "`/estimate-epic BAPI-123`",
+          "retrieval_of": null,
+          "group": "tier3",
+          "profile": "estimation",
+          "availability": "profile_required",
+          "availability_text": "Included with the Estimation profile; Bridge cannot confirm whether that local profile is active.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        }
+      ]
+    },
+    {
+      "id": "operational",
+      "name": "Shipping and CI",
+      "description": "The tools used while shipping a change and watching CI.",
+      "tools": [
+        {
+          "tool": "resolve_ci_checks",
+          "display_name": "Resolve CI Checks",
+          "description": "Works out which CI checks apply to your repository and what each one means.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "operational",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": "BLOCK",
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "create_pull_request",
+          "display_name": "Create Pull Request",
+          "description": "Opens a pull request for the branch you are working on.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "operational",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": "BLOCK",
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "merge_pull_request",
+          "display_name": "Merge Pull Request",
+          "description": "Asks the server to merge a pull request. The server decides — it re-checks the commit, refuses anything touching your workflow files, and only reports success when the merge actually landed.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "operational",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": "BLOCK",
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "poll_ci_checks",
+          "display_name": "Poll CI Checks",
+          "description": "Reports the current status of your CI checks for a commit, including detail about anything that failed.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "operational",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": "BLOCK",
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "parse_repository",
+          "display_name": "Parse Repository",
+          "description": "Starts a background job that indexes your codebase so Bridge's agents can reason about it, or reports whether that job is still running.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "operational",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": "BLOCK",
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "regenerate_directory_map",
+          "display_name": "Regenerate Directory Map",
+          "description": "Rebuilds the map of your repository's layout that Bridge's agents navigate with.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "operational",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": "BLOCK",
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "track_ticket",
+          "display_name": "Track Ticket",
+          "description": "Records a ticket and fills in the history of when it changed state.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "operational",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "update_ticket_state",
+          "display_name": "Update Ticket State",
+          "description": "Records where a ticket sits in your workflow, for reporting.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "operational",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "get_ticket_state",
+          "display_name": "Get Ticket State",
+          "description": "Reads the workflow state recorded for a ticket.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "operational",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "get_ticket_state_tree",
+          "display_name": "Get Ticket State Tree",
+          "description": "Reads the repository's live ticket dependency tree: what each ticket is blocked on, what it blocks, and how far each work attempt got.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "operational",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "update_jira_status",
+          "display_name": "Update Ticket Status",
+          "description": "Moves a ticket to a different status.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "operational",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "fresh_base",
+          "display_name": "Fresh Base",
+          "description": "Prepares an up-to-date base branch so a ticket that depends on another starts from the right code, and removes it afterwards.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "operational",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": "BLOCK",
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "wait_for_ci_checks",
+          "display_name": "Wait For CI Checks",
+          "description": "Waits in one bounded window until every CI check for a commit is terminal, reporting each check's status without judging pass or fail.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "operational",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        }
+      ]
+    },
+    {
+      "id": "extra",
+      "name": "Behind the scenes",
+      "description": "Machinery the commands above use automatically.",
+      "tools": [
+        {
+          "tool": "ping",
+          "display_name": "Ping",
+          "description": "Checks that Bridge is reachable and your project is recognized, and reports your role and where Bridge saves generated documents.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "extra",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "check_permissions",
+          "display_name": "Check Permissions",
+          "description": "Reports what your current setup is allowed to do.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "extra",
+          "profile": "sfcc",
+          "availability": "profile_required",
+          "availability_text": "Included with the SFCC profile; Bridge cannot confirm whether that local profile is active.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "get_install_manifest",
+          "display_name": "Get Install Manifest",
+          "description": "Reports your project's current setup and which capabilities are available.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "extra",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "apply_install_manifest",
+          "display_name": "Apply Install Manifest",
+          "description": "Saves your project's configuration during setup.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "extra",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "persist_routing_credential",
+          "display_name": "Persist Routing Credential",
+          "description": "Stores the model-routing setting your project uses.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "extra",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "config_field",
+          "display_name": "Project Config Field",
+          "description": "Reads or updates one of your project's configuration and standards fields.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "extra",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "model_thresholds",
+          "display_name": "Model-Tier Thresholds",
+          "description": "Reads or changes the difficulty thresholds that pick the model tier for review and implementation, for you, the project, or a member.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "extra",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "get_project_standards",
+          "display_name": "Get Project Standards",
+          "description": "Reads the coding standards recorded for your project.",
+          "how_to_use": "Call the `get_project_standards` MCP tool directly — it takes no required input and returns the project's recorded standards text.",
+          "retrieval_of": null,
+          "group": "extra",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "generate_decision_page",
+          "display_name": "Generate Decision Page",
+          "description": "Builds a page that captures your review decisions as structured data.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "extra",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "get_pipeline_recipe",
+          "display_name": "Get Pipeline Recipe",
+          "description": "Returns the ordered steps that make up one of Bridge's workflows.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "extra",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "visual_diff",
+          "display_name": "Visual Diff",
+          "description": "Compares a screenshot against a reference image to check how closely they match.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "extra",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "get_epic_snapshot",
+          "display_name": "Get Epic Snapshot",
+          "description": "Reports the current state of an epic being worked by multiple agents.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "extra",
+          "profile": "epic_implementer",
+          "availability": "profile_required",
+          "availability_text": "Included with the Epic Implementer profile; Bridge cannot confirm whether that local profile is active.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "explain_run",
+          "display_name": "Explain Run",
+          "description": "Explains why an epic run, or one ticket in it, is stuck.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "extra",
+          "profile": "epic_implementer",
+          "availability": "profile_required",
+          "availability_text": "Included with the Epic Implementer profile; Bridge cannot confirm whether that local profile is active.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "invite_member",
+          "display_name": "Invite Member",
+          "description": "Invites a teammate to your already-configured project by minting a scoped access key for them; admin-only.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "extra",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "get_phase_context",
+          "display_name": "Get Phase Context",
+          "description": "Reports which plan steps the current workflow phase owns, what earlier phases recorded, and which recorded work is committed.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "extra",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "record_phase_result",
+          "display_name": "Record Phase Result",
+          "description": "Records how a workflow phase settled every plan step it owned, rejecting a report that leaves one unaccounted for.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "extra",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "record_checkpoint",
+          "display_name": "Record Checkpoint",
+          "description": "Records the branch and commit your produced work was pushed to, so a later phase can prove it is recoverable.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "extra",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "get_council",
+          "display_name": "Get AI Council",
+          "description": "Retrieves an AI council that was already generated for a ticket.",
+          "how_to_use": null,
+          "retrieval_of": "request_council",
+          "group": "extra",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "get_deep_research",
+          "display_name": "Get Deep Research",
+          "description": "Retrieves a research report that was already generated.",
+          "how_to_use": null,
+          "retrieval_of": "request_deep_research",
+          "group": "extra",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "get_plan",
+          "display_name": "Get Plan",
+          "description": "Retrieves an implementation plan that was already generated for a ticket.",
+          "how_to_use": null,
+          "retrieval_of": "request_plan_generation",
+          "group": "extra",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "get_clarifying_questions",
+          "display_name": "Get Clarifying Questions",
+          "description": "Retrieves clarifying questions that were already generated for a ticket.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "extra",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "get_ticket_critique",
+          "display_name": "Get Ticket Critique",
+          "description": "Retrieves a ticket critique that was already generated.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "extra",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "get_doc",
+          "display_name": "Get Doc",
+          "description": "Retrieves a design document that was already generated for a ticket.",
+          "how_to_use": null,
+          "retrieval_of": "create_doc",
+          "group": "extra",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "get_reimplement_context",
+          "display_name": "Get Reimplement Context",
+          "description": "Retrieves the follow-up context that was already gathered for a ticket.",
+          "how_to_use": null,
+          "retrieval_of": "request_reimplement_context",
+          "group": "extra",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "assess_epic_implementer_eligibility",
+          "display_name": "Assess Epic Implementer Eligibility",
+          "description": "Predicts which epic children are likely to need a human merge or hand review, before Epic Implementer work begins.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "extra",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "clarify_task",
+          "display_name": "Quick Clarify",
+          "description": "Clarifies a task from its description alone, with no Jira ticket or repository connection required; connecting a repository later adds code-aware questions.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "extra",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "capture_review_decisions",
+          "display_name": "Capture Review Decisions",
+          "description": "Stores the settled decisions from a ticket review durably, checked against the manifest of what that review asked you to resolve.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "extra",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "wait_for_ticket_review",
+          "display_name": "Wait For Ticket Review",
+          "description": "Waits in one bounded window for a submitted ticket review's documents to become retrievable, without starting one.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "extra",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "publish_reviewed_attachment",
+          "display_name": "Publish Reviewed Attachment",
+          "description": "Stores a captured review's fixed local Markdown copy in Bridge and, when the project uses Jira, also appends it to the Jira ticket without deleting older attachments.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "extra",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "get_ticket_delivery_readiness",
+          "display_name": "Get Ticket Delivery Readiness",
+          "description": "Reports the server's decision on whether a managed ticket's work is ready to publish, merge, or complete, and what still blocks it.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "extra",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "get_epic_contract_context",
+          "display_name": "Get Epic Contract Context",
+          "description": "Reads an epic child's parent requirements and its siblings' contracts, with an explicit account of what was and was not retrieved.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "extra",
+          "profile": "core",
+          "availability": "available_now",
+          "availability_text": "Available now.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        }
+      ]
+    },
+    {
+      "id": "sfcc",
+      "name": "Salesforce B2C Commerce",
+      "description": "Tools for inspecting and updating a Salesforce B2C Commerce instance.",
+      "tools": [
+        {
+          "tool": "system_object_list",
+          "display_name": "List System Objects",
+          "description": "Lists the system objects defined on your Salesforce B2C Commerce instance.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "sfcc",
+          "profile": "sfcc",
+          "availability": "profile_required",
+          "availability_text": "Included with the SFCC profile; Bridge cannot confirm whether that local profile is active.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "sfcc_setup_status",
+          "display_name": "SFCC Setup Status",
+          "description": "Reports which Salesforce B2C Commerce prerequisites are in place for this project.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "sfcc",
+          "profile": "sfcc",
+          "availability": "profile_required",
+          "availability_text": "Included with the SFCC profile; Bridge cannot confirm whether that local profile is active.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "sfcc_log_query",
+          "display_name": "SFCC Log Query",
+          "description": "Searches the logs on your Salesforce B2C Commerce instance.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "sfcc",
+          "profile": "sfcc",
+          "availability": "profile_required",
+          "availability_text": "Included with the SFCC profile; Bridge cannot confirm whether that local profile is active.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "system_object_get",
+          "display_name": "Get System Object",
+          "description": "Reads the definition of one Salesforce B2C Commerce system object.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "sfcc",
+          "profile": "sfcc",
+          "availability": "profile_required",
+          "availability_text": "Included with the SFCC profile; Bridge cannot confirm whether that local profile is active.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "system_object_attribute_search",
+          "display_name": "Search System Object Attributes",
+          "description": "Searches the attributes defined on a Salesforce B2C Commerce system object.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "sfcc",
+          "profile": "sfcc",
+          "availability": "profile_required",
+          "availability_text": "Included with the SFCC profile; Bridge cannot confirm whether that local profile is active.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "system_object_attribute_definition_create",
+          "display_name": "Create System Object Attribute",
+          "description": "Adds an attribute to a Salesforce B2C Commerce system object; your agent should confirm with you before changing your instance.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "sfcc",
+          "profile": "sfcc-write",
+          "availability": "profile_required",
+          "availability_text": "Included with the SFCC write profile; Bridge cannot confirm whether that local profile is active.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "system_object_attribute_definition_update",
+          "display_name": "Update System Object Attribute",
+          "description": "Changes an attribute on a Salesforce B2C Commerce system object; your agent should confirm with you before changing your instance.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "sfcc",
+          "profile": "sfcc-write",
+          "availability": "profile_required",
+          "availability_text": "Included with the SFCC write profile; Bridge cannot confirm whether that local profile is active.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "system_object_attribute_group_create",
+          "display_name": "Create System Object Attribute Group",
+          "description": "Adds an attribute group to a Salesforce B2C Commerce system object; your agent should confirm with you before changing your instance.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "sfcc",
+          "profile": "sfcc-write",
+          "availability": "profile_required",
+          "availability_text": "Included with the SFCC write profile; Bridge cannot confirm whether that local profile is active.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "system_object_attribute_group_update",
+          "display_name": "Update System Object Attribute Group",
+          "description": "Changes an attribute group on a Salesforce B2C Commerce system object; your agent should confirm with you before changing your instance.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "sfcc",
+          "profile": "sfcc-write",
+          "availability": "profile_required",
+          "availability_text": "Included with the SFCC write profile; Bridge cannot confirm whether that local profile is active.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "system_object_attribute_assign_to_group",
+          "display_name": "Assign System Object Attribute to Group",
+          "description": "Adds an existing Salesforce B2C Commerce attribute to an attribute group; your agent should confirm with you before changing your instance.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "sfcc",
+          "profile": "sfcc-write",
+          "availability": "profile_required",
+          "availability_text": "Included with the SFCC write profile; Bridge cannot confirm whether that local profile is active.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "custom_object_definition_attributes_get",
+          "display_name": "Get Custom Object Attributes",
+          "description": "Reads the attributes defined on a Salesforce B2C Commerce custom object type.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "sfcc",
+          "profile": "sfcc",
+          "availability": "profile_required",
+          "availability_text": "Included with the SFCC profile; Bridge cannot confirm whether that local profile is active.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "custom_object_definition_attribute_search",
+          "display_name": "Search Custom Object Attributes",
+          "description": "Searches the attributes defined on a Salesforce B2C Commerce custom object type.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "sfcc",
+          "profile": "sfcc",
+          "availability": "profile_required",
+          "availability_text": "Included with the SFCC profile; Bridge cannot confirm whether that local profile is active.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "custom_object_definition_attribute_create",
+          "display_name": "Create Custom Object Attribute",
+          "description": "Adds an attribute to a Salesforce B2C Commerce custom object type; your agent should confirm with you before changing your instance.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "sfcc",
+          "profile": "sfcc-write",
+          "availability": "profile_required",
+          "availability_text": "Included with the SFCC write profile; Bridge cannot confirm whether that local profile is active.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "custom_object_definition_attribute_update",
+          "display_name": "Update Custom Object Attribute",
+          "description": "Changes an attribute on a Salesforce B2C Commerce custom object type; your agent should confirm with you before changing your instance.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "sfcc",
+          "profile": "sfcc-write",
+          "availability": "profile_required",
+          "availability_text": "Included with the SFCC write profile; Bridge cannot confirm whether that local profile is active.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "site_preference_group_list",
+          "display_name": "List Site Preference Groups",
+          "description": "Lists the site preference groups on your Salesforce B2C Commerce instance.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "sfcc",
+          "profile": "sfcc",
+          "availability": "profile_required",
+          "availability_text": "Included with the SFCC profile; Bridge cannot confirm whether that local profile is active.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "site_preference_get",
+          "display_name": "List Site Preference IDs",
+          "description": "Lists the preference ids in one Salesforce B2C Commerce preference group; it does not return their values.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "sfcc",
+          "profile": "sfcc",
+          "availability": "profile_required",
+          "availability_text": "Included with the SFCC profile; Bridge cannot confirm whether that local profile is active.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "site_preference_search",
+          "display_name": "Search Site Preferences",
+          "description": "Searches the preference ids in one Salesforce B2C Commerce preference group; it does not return their values.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "sfcc",
+          "profile": "sfcc",
+          "availability": "profile_required",
+          "availability_text": "Included with the SFCC profile; Bridge cannot confirm whether that local profile is active.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "site_preference_values_set",
+          "display_name": "Set Site Preference Values",
+          "description": "Changes site preference values for one site you name on your Salesforce B2C Commerce instance; your agent should confirm with you before changing your instance.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "sfcc",
+          "profile": "sfcc-write",
+          "availability": "profile_required",
+          "availability_text": "Included with the SFCC write profile; Bridge cannot confirm whether that local profile is active.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        },
+        {
+          "tool": "custom_preference_definition_create",
+          "display_name": "Create Custom Preference",
+          "description": "Adds a custom preference definition to your Salesforce B2C Commerce instance; your agent should confirm with you before changing your instance.",
+          "how_to_use": null,
+          "retrieval_of": null,
+          "group": "sfcc",
+          "profile": "sfcc-write",
+          "availability": "profile_required",
+          "availability_text": "Included with the SFCC write profile; Bridge cannot confirm whether that local profile is active.",
+          "effect": null,
+          "missing": [],
+          "semantics": "all_of",
+          "variants": []
+        }
+      ]
+    }
+  ],
+  "workflows": [
+    {
+      "workflow": "implement_ticket",
+      "display_name": "Implement Ticket",
+      "description": "Builds one ticket end to end: plans it, writes the code, opens a pull request, and watches CI.",
+      "how_to_use": "`/implement-ticket BAPI-123`",
+      "availability": "available_after_dependencies",
+      "availability_text": "Available once you index your repository."
+    },
+    {
+      "workflow": "start_tickets",
+      "display_name": "Start Tickets",
+      "description": "Builds several tickets at once, each in its own copy of the repo (a git worktree) with its own agent.",
+      "how_to_use": "`/start-tickets BAPI-248 BAPI-250`",
+      "availability": "available_after_dependencies",
+      "availability_text": "Available once you index your repository."
+    },
+    {
+      "workflow": "review_and_start",
+      "display_name": "Review and Start",
+      "description": "Like Start Tickets, but each ticket is reviewed first and only built if it passes.",
+      "how_to_use": "`/review-and-start BAPI-248 BAPI-250`",
+      "availability": "available_after_dependencies",
+      "availability_text": "Available once you index your repository."
+    },
+    {
+      "workflow": "explore_ticket",
+      "display_name": "Define Tickets",
+      "description": "Analyzes a single task or feature specification to define, refine, and structure one or more actionable Jira tickets. It maps the code paths, dependencies, and project conventions the task would touch, settles acceptance criteria with you on a decision page, then compares the viable implementation approaches and their trade-offs so the ticket work is grounded in the real codebase. Along the way it surfaces the ambiguities that still need deciding and can pull in optional web or deep research where the answer is not in the code.",
+      "how_to_use": "`/define-tickets <task>` — *\"Define the tickets we'd need to add a Mistral LLM provider.\"*",
+      "availability": "available_now",
+      "availability_text": "Available now."
+    },
+    {
+      "workflow": "create_decision_page",
+      "display_name": "Create Decision Page",
+      "description": "Turns open decisions from the current conversation into an interactive HTML decision page, then folds the submitted answers back into the conversation.",
+      "how_to_use": "`/create-decision-page <topic or open questions>` — e.g. *\"how we handle rate limiting\"* — or leave it empty to frame the open choices already raised earlier in the conversation.",
+      "availability": "available_now",
+      "availability_text": "Available now."
+    },
+    {
+      "workflow": "regression_check",
+      "display_name": "Regression Check",
+      "description": "Runs the deterministic regression-reviewer (lightweight mode) against a proposed code change and reports its blast radius — which real call-sites, tests, mocks, or config the change does and doesn't account for.",
+      "how_to_use": "`/regression-check` reviews the working tree against `HEAD` by default; `/regression-check --diff main...HEAD` reviews an explicit range.",
+      "availability": "available_now",
+      "availability_text": "Available now."
+    },
+    {
+      "workflow": "scan_test_coverage",
+      "display_name": "Scan Test Coverage",
+      "description": "Scans recently shipped tickets from git history and reports which features have or could gain integration tests, and which can only be smoke tested.",
+      "how_to_use": "`/scan-test-coverage` runs incrementally from the last recorded marker in `docs/test-coverage/STATE.md`.",
+      "availability": "available_now",
+      "availability_text": "Available now."
+    },
+    {
+      "workflow": "estimate_ticket",
+      "display_name": "Estimate Ticket",
+      "description": "One-ticket shortcut over the existing epic estimation capability: estimates a single Jira ticket via the same `estimate_epic` tool.",
+      "how_to_use": "`/estimate-ticket BAPI-123`",
+      "availability": "available_now",
+      "availability_text": "Available now."
+    },
+    {
+      "workflow": "draft_ticket",
+      "display_name": "Draft Ticket",
+      "description": "Delegates to the Jira Ticket Writer to create only a local Markdown draft — it does not create or update a Jira issue.",
+      "how_to_use": "`/draft-ticket <description>`",
+      "availability": "available_now",
+      "availability_text": "Available now."
+    },
+    {
+      "workflow": "drive_epic_run",
+      "display_name": "Drive Epic Run",
+      "description": "Builds a whole epic for you. Bridge works through the child tickets in order, merges each one into the epic branch, and fixes routine problems along the way, so you only step in when it truly needs you. It shows you a preview and waits for your yes before it starts.",
+      "how_to_use": "`/drive-epic-run BAPI-1145`",
+      "availability": "available_after_dependencies",
+      "availability_text": "Available once you index your repository."
+    }
+  ],
+  "concise_tool_capabilities": [
+    {
+      "id": "available_now",
+      "name": "Available now",
+      "tools": [
+        {
+          "id": "request_ticket_review",
+          "kind": "tool",
+          "display_name": "Review Ticket",
+          "description": "Runs a full quality review of a ticket: clarifying questions and a critique plus an alternate-model second opinion, then evaluates the findings and produces a decision page for accepting or rejecting them.",
+          "how_to_use": "`/review-tickets BAPI-123` (command only — \"review\" as free text is easily mistaken for a freehand agent review). A single key reviews inline in the current session — no terminal tab, no worktree. For several tickets at once, `/review-tickets BAPI-123 BAPI-456` opens one terminal tab per ticket and reviews them in parallel with no worktrees; every review flag applies, and `--review KEY=auto,rounds=N` sets per-ticket overrides."
+        },
+        {
+          "id": "request_council",
+          "kind": "tool",
+          "display_name": "AI Council",
+          "description": "Fans your problem out to two different models and returns their approaches, in technical, design, discovery, or general mode.",
+          "how_to_use": "`/ai-council <question>`"
+        },
+        {
+          "id": "request_deep_research",
+          "kind": "tool",
+          "display_name": "Deep Research",
+          "description": "Runs multi-source, fact-checked web research on a technical topic and returns a cited report.",
+          "how_to_use": "`/bridge-research <question>`"
+        },
+        {
+          "id": "create_ticket",
+          "kind": "tool",
+          "display_name": "Upload Ticket",
+          "description": "Creates a real Jira issue from a drafted ticket, including child tickets under an epic; your agent should confirm with you before creating it.",
+          "how_to_use": "Ask your agent to create the ticket; it should confirm with you before creating the live issue."
+        },
+        {
+          "id": "create_doc",
+          "kind": "tool",
+          "display_name": "Create Doc",
+          "description": "Generates a design document for a ticket — a technical design document, a functional spec, or a product requirements document.",
+          "how_to_use": "`/create-doc BAPI-123 --doc-type tdd` (or `fsd` / `prd`)"
+        },
+        {
+          "id": "second_opinion",
+          "kind": "tool",
+          "display_name": "Second Opinion",
+          "description": "Gets an immediate critique of any text from a different model family, without saving an artifact.",
+          "how_to_use": "Ask your agent — \"Get a second opinion from Gemini on whether the BAPI-123 plan's migration step is safe to run against production.\""
+        },
+        {
+          "id": "generate_image",
+          "kind": "tool",
+          "display_name": "Generate Image",
+          "description": "Generates an image from a text prompt using a provider image model, spending provider credits on every call.",
+          "how_to_use": "Ask your agent — \"Generate an image of a dashboard showing SOC2 evidence freshness as a traffic-light grid.\""
+        },
+        {
+          "id": "add_comment",
+          "kind": "tool",
+          "display_name": "Write Comment",
+          "description": "Posts a comment on a ticket.",
+          "how_to_use": "Ask your agent — \"Post a comment on BAPI-123: blocked on the expired Atlassian token — will retry after it is rotated.\""
+        },
+        {
+          "id": "get_comments",
+          "kind": "tool",
+          "display_name": "Read Comments",
+          "description": "Reads the comment thread on a ticket.",
+          "how_to_use": "Ask your agent — \"Read the comments on BAPI-123 and summarize what was decided.\""
+        },
+        {
+          "id": "attachment",
+          "kind": "tool",
+          "display_name": "Ticket Attachments",
+          "description": "Downloads files from a ticket to your disk, or attaches a local file to a ticket.",
+          "how_to_use": "Ask your agent — \"Download the design mockups attached to BAPI-123 into my docs folder,\" or \"Attach build-log.txt to BAPI-123.\""
+        },
+        {
+          "id": "explore_ticket",
+          "kind": "workflow",
+          "display_name": "Define Tickets",
+          "description": "Analyzes a single task or feature specification to define, refine, and structure one or more actionable Jira tickets. It maps the code paths, dependencies, and project conventions the task would touch, settles acceptance criteria with you on a decision page, then compares the viable implementation approaches and their trade-offs so the ticket work is grounded in the real codebase. Along the way it surfaces the ambiguities that still need deciding and can pull in optional web or deep research where the answer is not in the code.",
+          "how_to_use": "`/define-tickets <task>` — *\"Define the tickets we'd need to add a Mistral LLM provider.\"*"
+        },
+        {
+          "id": "create_decision_page",
+          "kind": "workflow",
+          "display_name": "Create Decision Page",
+          "description": "Turns open decisions from the current conversation into an interactive HTML decision page, then folds the submitted answers back into the conversation.",
+          "how_to_use": "`/create-decision-page <topic or open questions>` — e.g. *\"how we handle rate limiting\"* — or leave it empty to frame the open choices already raised earlier in the conversation."
+        },
+        {
+          "id": "regression_check",
+          "kind": "workflow",
+          "display_name": "Regression Check",
+          "description": "Runs the deterministic regression-reviewer (lightweight mode) against a proposed code change and reports its blast radius — which real call-sites, tests, mocks, or config the change does and doesn't account for.",
+          "how_to_use": "`/regression-check` reviews the working tree against `HEAD` by default; `/regression-check --diff main...HEAD` reviews an explicit range."
+        },
+        {
+          "id": "scan_test_coverage",
+          "kind": "workflow",
+          "display_name": "Scan Test Coverage",
+          "description": "Scans recently shipped tickets from git history and reports which features have or could gain integration tests, and which can only be smoke tested.",
+          "how_to_use": "`/scan-test-coverage` runs incrementally from the last recorded marker in `docs/test-coverage/STATE.md`."
+        },
+        {
+          "id": "draft_ticket",
+          "kind": "workflow",
+          "display_name": "Draft Ticket",
+          "description": "Delegates to the Jira Ticket Writer to create only a local Markdown draft — it does not create or update a Jira issue.",
+          "how_to_use": "`/draft-ticket <description>`"
+        }
+      ]
+    },
+    {
+      "id": "needs_setup",
+      "name": "Needs setup",
+      "tools": [
+        {
+          "id": "request_plan_generation",
+          "kind": "tool",
+          "display_name": "Plan Ticket",
+          "description": "Writes a step-by-step plan for a ticket that points at the real files to change.",
+          "how_to_use": "`/plan-ticket BAPI-123`",
+          "availability_text": "Available once you index your repository."
+        },
+        {
+          "id": "implement_ticket",
+          "kind": "workflow",
+          "display_name": "Implement Ticket",
+          "description": "Builds one ticket end to end: plans it, writes the code, opens a pull request, and watches CI.",
+          "how_to_use": "`/implement-ticket BAPI-123`",
+          "availability_text": "Available once you index your repository."
+        },
+        {
+          "id": "start_tickets",
+          "kind": "workflow",
+          "display_name": "Start Tickets",
+          "description": "Builds several tickets at once, each in its own copy of the repo (a git worktree) with its own agent.",
+          "how_to_use": "`/start-tickets BAPI-248 BAPI-250`",
+          "availability_text": "Available once you index your repository."
+        },
+        {
+          "id": "review_and_start",
+          "kind": "workflow",
+          "display_name": "Review and Start",
+          "description": "Like Start Tickets, but each ticket is reviewed first and only built if it passes.",
+          "how_to_use": "`/review-and-start BAPI-248 BAPI-250`",
+          "availability_text": "Available once you index your repository."
+        },
+        {
+          "id": "drive_epic_run",
+          "kind": "workflow",
+          "display_name": "Drive Epic Run",
+          "description": "Builds a whole epic for you. Bridge works through the child tickets in order, merges each one into the epic branch, and fixes routine problems along the way, so you only step in when it truly needs you. It shows you a preview and waits for your yes before it starts.",
+          "how_to_use": "`/drive-epic-run BAPI-1145`",
+          "availability_text": "Available once you index your repository."
+        }
+      ],
+      "heading": "Needs setup — these unlock once Bridge has indexed your repository:"
+    }
+  ],
+  "human_setup": [
+    {
+      "id": "vcs_access_token",
+      "configure_in": "Run `npx -y @bridge_gpt/mcp-server@latest connect-bitbucket --repo <repo_name>` in your terminal (opens Bitbucket in your browser to install the Forge app; Bridge API never accepts VCS credentials through an agent or MCP tool)",
+      "setup_instructions": {
+        "install_url": null,
+        "steps": [
+          "Create an access token: repository Settings → Security → Access Token → Create access token. Name can be anything (the AI comments under that name). Set expiry to None or far into the future. Scopes: Repositories: Read, Pull requests: Read & Write, Webhooks: Read & Write.",
+          "Record the token somewhere safe — you will need it to complete setup.",
+          "Get the Repository ID: Repositories → open the repository → Repository settings → Repository details → the Repository name field is the Repository ID.",
+          "Get the Workspace ID: account menu (top right) → All workspaces → find the workspace → Manage → read the Workspace ID field.",
+          "Create an integration user that will comment on pull requests and interact with Bitbucket as the AI, then log in as that user and note the 'username' field on that user's Bitbucket account settings page.",
+          "Create an app password for the integration user (App passwords in the left panel → Create app password), granting access to pull requests and repositories, and save the app password you receive."
+        ],
+        "how_to_find_id": "The Repository ID is the Repository name field under Repository settings → Repository details. The Workspace ID is under the account menu → All workspaces → Manage. The username is the 'username' field on the integration user's Bitbucket account settings page."
+      },
+      "required_for": [
+        "pull request creation",
+        "code review",
+        "repository parsing of private repos"
+      ],
+      "display_text": "Set up VCS access token to unlock pull request creation; code review; repository parsing of private repos."
+    }
+  ],
+  "locked_tools": [
+    {
+      "tool": "code_writer_generate_architecture",
+      "effect": "BLOCK",
+      "missing": [
+        "code_index"
+      ],
+      "semantics": "all_of"
+    },
+    {
+      "tool": "code_writer_generate_plan",
+      "effect": "BLOCK",
+      "missing": [
+        "code_index"
+      ],
+      "semantics": "all_of"
+    },
+    {
+      "tool": "create_doc:architecture",
+      "effect": "BLOCK",
+      "missing": [
+        "code_index"
+      ],
+      "semantics": "all_of"
+    },
+    {
+      "tool": "create_doc:tdd",
+      "effect": "BLOCK",
+      "missing": [
+        "code_index"
+      ],
+      "semantics": "all_of"
+    },
+    {
+      "tool": "generate_architecture_direct",
+      "effect": "BLOCK",
+      "missing": [
+        "code_index"
+      ],
+      "semantics": "all_of"
+    },
+    {
+      "tool": "generate_plan_direct",
+      "effect": "BLOCK",
+      "missing": [
+        "code_index"
+      ],
+      "semantics": "all_of"
+    },
+    {
+      "tool": "request_council:discovery",
+      "effect": "BLOCK",
+      "missing": [
+        "code_index"
+      ],
+      "semantics": "all_of"
+    },
+    {
+      "tool": "request_council:technical",
+      "effect": "BLOCK",
+      "missing": [
+        "code_index"
+      ],
+      "semantics": "all_of"
+    },
+    {
+      "tool": "request_reimplement_context",
+      "effect": "BLOCK",
+      "missing": [
+        "code_index"
+      ],
+      "semantics": "all_of"
+    }
+  ],
+  "unlocked_tools": [
+    {
+      "tool": "clarify_task",
+      "effect": "DEGRADE",
+      "missing": [],
+      "semantics": "all_of"
+    },
+    {
+      "tool": "code_writer_generate_fsd",
+      "effect": "DEGRADE",
+      "missing": [],
+      "semantics": "all_of"
+    },
+    {
+      "tool": "create_doc:fsd",
+      "effect": "DEGRADE",
+      "missing": [],
+      "semantics": "all_of"
+    },
+    {
+      "tool": "create_doc:prd",
+      "effect": "DEGRADE",
+      "missing": [],
+      "semantics": "all_of"
+    },
+    {
+      "tool": "create_pull_request",
+      "effect": "BLOCK",
+      "missing": [],
+      "semantics": "all_of"
+    },
+    {
+      "tool": "generate_clarifying_questions_direct",
+      "effect": "DEGRADE",
+      "missing": [],
+      "semantics": "all_of"
+    },
+    {
+      "tool": "generate_fsd_direct",
+      "effect": "DEGRADE",
+      "missing": [],
+      "semantics": "all_of"
+    },
+    {
+      "tool": "generate_prd_direct",
+      "effect": "DEGRADE",
+      "missing": [],
+      "semantics": "all_of"
+    },
+    {
+      "tool": "generate_ticket_critique_direct",
+      "effect": "DEGRADE",
+      "missing": [],
+      "semantics": "all_of"
+    },
+    {
+      "tool": "generate_ticket_review_direct",
+      "effect": "DEGRADE",
+      "missing": [],
+      "semantics": "all_of"
+    },
+    {
+      "tool": "materialize_fresh_base",
+      "effect": "BLOCK",
+      "missing": [],
+      "semantics": "all_of"
+    },
+    {
+      "tool": "merge_pull_request",
+      "effect": "BLOCK",
+      "missing": [],
+      "semantics": "all_of"
+    },
+    {
+      "tool": "parse_repository",
+      "effect": "BLOCK",
+      "missing": [],
+      "semantics": "all_of"
+    },
+    {
+      "tool": "poll_ci_checks",
+      "effect": "BLOCK",
+      "missing": [],
+      "semantics": "all_of"
+    },
+    {
+      "tool": "regenerate_directory_map",
+      "effect": "BLOCK",
+      "missing": [],
+      "semantics": "all_of"
+    },
+    {
+      "tool": "resolve_ci_checks",
+      "effect": "BLOCK",
+      "missing": [],
+      "semantics": "all_of"
+    }
+  ]
+}
