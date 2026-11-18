@@ -42,6 +42,14 @@ on real anchors from the start.
 | `app/_components/` | Header, hero, court drawing, static sections, `Badge`, `Button` |
 | `app/_sections/{live,finder,waitlist}/Section.tsx` | Shells that later tickets replace |
 
+## Browser test harness
+
+`playwright.config.ts` runs the specs in `e2e/` against the production build, with a
+local weather stub, a fixed `RALLY_NOW` and a separate database path per app server.
+Every spec imports `e2e/fixtures.ts`, which fails a test on any console or page error.
+CI runs lint, unit tests, the build and then the browser tests in one job. See
+`e2e/README.md` for ports, projects and how later tickets add specs.
+
 ## Configuration
 
 - `RALLY_NOW` is optional and read on the server only.
@@ -59,6 +67,7 @@ on real anchors from the start.
 npm run lint
 npm test
 npm run build
+npm run e2e
 ```
 
 With `RALLY_NOW=2026-11-17T17:40:00-07:00`, a browser in `America/Denver` shows the
