@@ -111,6 +111,84 @@ another worktree's server and test the wrong code. Fix: port derived from a hash
 checkout path (3100–3899, override `E2E_PORT`), and server reuse is opt-in
 (`E2E_REUSE_SERVER=1`).
 
+## Finding 4 — Epic Implementer setup blocks on *any* missing learned field, including code review instructions
+
+**Date found:** 2026-11-18
+**Severity:** Medium — setup dead-ends on a field that should be advisory.
+
+`/install-epic-implementer` (MCP 0.2.77) stopped at its first read-only assessment with
+`repository_not_learned` and `missing_learned_fields: ["design_principles", "review_instructions"]`.
+Nothing was written. The only offered paths were `/learn-repository` (the whole set) or
+`/teach-bridge` (one at a time).
+
+Context: this repo took the greenfield **defaults** path in `/install-bridge`, which seeded seven
+catalog defaults and skipped `review_instructions` (no catalog entry) and `design_principles`.
+So the defaults path produces a repository that `/install-epic-implementer` then refuses — the
+two setup commands disagree about what "set up" means.
+
+### Which fields should block
+
+- **`design_principles` — should block (for a repo with UI).** Epic children that build UI
+  write it directly from this field; with no design direction the implementer improvises a visual
+  language, which is a real quality risk and hard to undo across parallel children.
+- **`review_instructions` — should not block.** The reviewer can run with generic review
+  behavior, and `check_code_correctness` already gates whether PRs are held to standards. A
+  missing review field degrades review quality; it does not make implementation unsafe. It
+  belongs in the advisory list ("Also worth doing"), not in `repository_not_learned`.
+
+### Suggested fix (for bridge-api)
+
+- Split `missing_learned_fields` into blocking and advisory sets. Blocking: fields the
+  implementer writes code from (`design_principles` when the repo has UI, architecture and
+  testing instructions). Advisory: `review_instructions`, `documentation_instructions`.
+- Make the greenfield defaults path and this gate agree: either seed a catalog default for
+  `review_instructions` / `design_principles`, or have `/install-bridge`'s defaults report
+  name them as still needed before an epic run.
+- Consider deriving `design_principles` from attached comps/style guides when an epic carries
+  them (here the epic's `styles.md` + comps were sufficient to write them by hand).
+
+### What we did in this repo
+
+- Wrote `design_principles` from the RNX-1 epic, its spec, `styles.md` and the full-page comp,
+  kept project-level rather than ticket-specific (`design_principles.md`, this directory).
+- `review_instructions`: next.
+
+## Finding 5 — Changing one worker setting means re-running the whole Epic Implementer setup
+
+**Date found:** 2026-11-18
+**Severity:** Medium — friction, and it pushes owners toward hand-editing local records.
+
+To let workers use the Playwright MCP (needed for UI checks against the epic server), the only
+sanctioned path is to re-run `/install-epic-implementer`: a full assessment, a full proposal,
+and a full approval, re-stating every other answer. The grant lives in
+`~/.config/bridge/mcp-grants/<repo>.json` (`mcp_server/src/mcp-grant.ts`), and only setup
+writes it. No install is needed — Playwright is a built-in preset (pinned `@playwright/mcp`,
+launched with `npx -y --headless --isolated`, `mcp_server/src/mcp-presets.ts`) — so this is
+purely a settings change behind the full setup loop.
+
+There is precedent for a narrow path: `install epic-implementer --epic-server` re-asks only the
+epic-server question (`install-bridge-conductor.ts:948`). The worker MCP grant has no equivalent.
+
+### Related: the recommendation ignored what this repo already declared
+
+Setup recommended **no** extra worker servers ("each extra server is a deliberate grant") even
+though Bridge config already had `e2e_testing_stack = Playwright`, the epic plainly builds UI,
+and the same setup recommended a **local epic server** for UI checks. Per
+`mcp_server/src/conductor/ui-readiness.ts`, UI verification needs *both* a browser MCP grant and
+an epic-server mode, so the recommended combination (local server + no browser) can never verify
+UI. The recommendation should be consistent with itself.
+
+### Suggested fix (for bridge-api)
+
+- Add a single-setting path, mirroring `--epic-server`: e.g.
+  `install epic-implementer --worker-mcp playwright` (or a `/teach-bridge`-style verb) that
+  re-asks only the grant question, shows its consequence, and asks one approval.
+- Generalize: every setup answer that has its own record (grant, epic server, epic-branch CI,
+  dependency install, test commands) should be changeable on its own without restating the rest.
+- When the epic-server recommendation is `local`/`sfcc_shared_active`, or `e2e_testing_stack`
+  names Playwright, recommend the Playwright preset in the worker grant (or at minimum warn that
+  the chosen combination leaves UI checks unverifiable).
+
 ---
 
 ## Change log — e2e setup (2026-11-18)
@@ -134,6 +212,11 @@ checkout path (3100–3899, override `E2E_PORT`), and server reuse is opt-in
 - `e2e_testing_stack` = `Playwright`
 - `unit_testing_instructions` → project-specific (`unit_testing_instructions.md`)
 - `e2e_testing_instructions` → project-specific (`e2e_testing_instructions.md`)
+- `design_principles` → project-specific (`design_principles.md`)
+- Both testing instructions revised to agree with the RNX-2 harness: e2e defers to
+  `playwright.config.ts` / `e2e/README.md` and the ticket, uses the fixtures import, the
+  server-side weather stub and per-server databases (no fixed port, no in-browser mocking of
+  server calls); unit tests are named after their module in a flat `__tests__/`, not mirrored.
 - `epic_implementer_test_commands` = `["npm test", "npm run test:e2e", "npm run lint"]` — saved at
   generation 2, `trial_state: not_tried`, `commands_in_force: []`. Takes effect only after a
   clean-checkout trial passes. All three commands pass on a fresh clone of `main` at `54c4d35`.

@@ -6,7 +6,7 @@
 - Libraries installed: `vitest`, `@testing-library/react`, `@testing-library/dom`. Not installed: `@testing-library/jest-dom` and `@testing-library/user-event`. Do not use their APIs (`toBeInTheDocument`, `userEvent`) unless the ticket adds the package; use Vitest matchers and `fireEvent` from `@testing-library/react`.
 - Vitest globals are off: import `test`, `expect`, `vi`, `describe`, `beforeEach` etc. from `vitest` in every file.
 - `vitest.setup.ts` runs Testing Library `cleanup()` after each test. Do not remove it; do not add a second cleanup mechanism.
-- Tests live in `__tests__/`, mirroring the source path (`app/page.tsx` → `__tests__/page.test.tsx`; `app/foo/bar.tsx` → `__tests__/foo/bar.test.tsx`), named `*.test.ts` / `*.test.tsx`. `e2e/` is excluded from Vitest and belongs to Playwright.
+- Tests live in `__tests__/`, named after the module or component they cover (`lib/format.ts` → `__tests__/format.test.ts`, a component → `__tests__/<Component>.test.tsx`), as `*.test.ts` / `*.test.tsx`. When a ticket names a test file, use that exact path. `e2e/` is excluded from Vitest and belongs to Playwright.
 
 ## When a unit test is required
 
@@ -25,6 +25,7 @@
 
 ## Mocking
 
+- Time-dependent code reads the clock only through the app's clock module. Control time in tests through that module's supported setting (`RALLY_NOW`, set and restored per test) or `vi.useFakeTimers`, and make time-zone logic pass regardless of the process time zone (run with `TZ=UTC` and another zone when the ticket asks).
 - Mock only external boundaries: `fetch`/network, time (`vi.useFakeTimers`), randomness, and Next.js runtime modules that need a server or router (`next/navigation`, `next/headers`) via `vi.mock`. Never mock the component or function under test.
 - Restore mocks after each test (`vi.restoreAllMocks()` / `vi.useRealTimers()` in `afterEach`) so tests stay independent and order-free.
 - `next/image` and `next/link` render in jsdom; do not mock them unless a test needs to.

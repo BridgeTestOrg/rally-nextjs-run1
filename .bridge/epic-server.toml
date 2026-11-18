@@ -1,0 +1,40 @@
+# Epic server guidance for Rally (Next.js 16, App Router).
+#
+# Read by the /drive-epic-run driver only. The driver adapts it into the run's
+# private recipe and proves it; editing this file on a branch does not change a
+# live run. No secrets belong here: Rally has no accounts, no API keys and no
+# login, so there is no seed step and no credential reference.
+
+guidance = '''
+Rally is a single-page Next.js 16 app served as a production build (next build,
+then next start). Workers check the UI against comps that are frozen at
+Tue 17 Nov 2026 17:40 America/Denver, so the server must run with a fixed clock.
+
+Serve it like this:
+- prepare: npm ci, then npm run build, in the serving worktree root.
+- start: next start on @PORT@ with this environment:
+    RALLY_NOW=2026-11-17T17:40:00-07:00   (fixed clock; matches the comps)
+    DATABASE_PATH=test-results/epic-server/rally.db   (throwaway, per turn, git-ignored)
+    WEATHER_URL=http://127.0.0.1:<PORT+1>  (the repo's local weather stub)
+  Never point WEATHER_URL at the real National Weather Service and never use
+  data/rally.db.
+- The weather stub (e2e/weather-stub.mjs, a dependency-free node:http server
+  taking --port) arrives with the first epic ticket. When the file exists at the
+  served head, start it on PORT+1 before next start; when it does not, skip it
+  (earlier heads read no weather). The start hint below does exactly this.
+- The SQLite database and its table are created by the app's own migration on
+  first use; there is no separate migrate step and no Postgres.
+- ready: GET / returns 200.
+- No login, no seed: the site has no accounts.
+'''
+
+[hints]
+prepare = [["npm", "ci"], ["npm", "run", "build"]]
+start = ["sh", "-c", "mkdir -p test-results/epic-server && STUB_PORT=$((PORT + 1)) && if [ -f e2e/weather-stub.mjs ]; then node e2e/weather-stub.mjs --port \"$STUB_PORT\" & fi; RALLY_NOW=2026-11-17T17:40:00-07:00 DATABASE_PATH=test-results/epic-server/rally.db WEATHER_URL=\"http://127.0.0.1:$STUB_PORT\" exec npx next start -p \"$PORT\""]
+ready = "/"
+
+[timing]
+start_seconds = 60
+ready_seconds = 60
+proof_seconds = 600
+lease_seconds = 300
