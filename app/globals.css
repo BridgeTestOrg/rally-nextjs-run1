@@ -397,6 +397,7 @@
   .rally-hero-card {
     position: relative;
     display: flex;
+    flex-wrap: wrap;
     grid-area: 1 / 1;
     align-items: flex-start;
     align-self: end;
@@ -412,7 +413,9 @@
   }
 
   .rally-hero-card__text {
+    flex: 1 1 120px;
     min-width: 0;
+    overflow-wrap: anywhere;
   }
 
   .rally-hero-card__name {
@@ -630,10 +633,14 @@
   }
 }
 
-/* Unlayered so these win over every component and utility rule. */
+/*
+ * Unlayered so these win over every component and utility rule. The halo fills
+ * the outline offset, keeping the blue ring visible on the court-green bands.
+ */
 :focus-visible {
   outline: 3px solid var(--color-focus);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--color-paper);
 }
 
 @media (prefers-reduced-motion: reduce) {
