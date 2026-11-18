@@ -134,15 +134,15 @@ checkout path (3100–3899, override `E2E_PORT`), and server reuse is opt-in
 - `e2e_testing_stack` = `Playwright`
 - `unit_testing_instructions` → project-specific (`unit_testing_instructions.md`)
 - `e2e_testing_instructions` → project-specific (`e2e_testing_instructions.md`)
-- `epic_implementer_test_commands` = `["npm test", "npm run test:e2e"]` — saved at generation 1,
-  `trial_state: not_tried`, `commands_in_force: []`. Takes effect only after a clean-checkout
-  trial passes, so the repo changes must be on the remote base branch first.
+- `epic_implementer_test_commands` = `["npm test", "npm run test:e2e", "npm run lint"]` — saved at
+  generation 2, `trial_state: not_tried`, `commands_in_force: []`. Takes effect only after a
+  clean-checkout trial passes. All three commands pass on a fresh clone of `main` at `54c4d35`.
 
 ## Open items before the epic run
 
-- [ ] Commit + push the Playwright/Vitest setup to `main` — the clean-checkout trial and every
-      epic branch start from the remote, which doesn't have it yet.
+- [x] Commit + push the Playwright/Vitest setup to `main` (`73b2973`, `54c4d35`).
 - [ ] Confirm the test-command trial passes (`commands_in_force` populated).
-- [ ] `check_code_correctness` is `false` — reviewer won't hold PRs to the correctness standards.
+- [x] `check_code_correctness` left `false` — owner's choice for this run; the standards still
+      guide implementation, but the reviewer won't flag violations.
 - [x] ~~CI runs Playwright~~ — decided against; the epic's local test gate covers it.
 - [x] `unit_testing_instructions` tailored.
