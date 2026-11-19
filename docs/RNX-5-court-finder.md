@@ -54,6 +54,14 @@ There are no API, configuration or database changes. The page reads the existing
 parameters: `state`, `day`, `time`, `lights=1` and `parking=1`. Invalid values fall back
 to their defaults.
 
+## Known issue
+
+The finder's Suspense body gives `/` a request-time hole. On Next.js 16.4.6, a waitlist
+post made without JavaScript then resumes that prerender and returns only the hole, so
+the visitor sees a blank page. The two `without JavaScript` tests in
+`e2e/waitlist.waitlist.spec.ts` fail for this reason. They pass at the base commit. The
+fix needs a change outside this ticket's files.
+
 ## Usage
 
 - `/` shows today's courts with the default filters.
