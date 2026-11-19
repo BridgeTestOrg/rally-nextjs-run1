@@ -69,6 +69,11 @@ test.describe('keyboard at 1280px', () => {
   test('reaches every control with a visible focus ring', async ({ page }) => {
     await page.goto('/')
 
+    // Live cards and the finder stream in after load and add controls, so
+    // measure only once both have replaced their loading skeletons.
+    await expect(page.locator('[aria-busy="true"]')).toHaveCount(0)
+    await expect(page.locator('[data-finder-body]')).toBeVisible()
+
     const stops = await tabThroughPage(page)
     const expected = await page.evaluate((selector) => {
       const all = Array.from(document.querySelectorAll('*'))
