@@ -38,7 +38,7 @@ function SegmentedGroup({
               className={HIDDEN_INPUT}
             />
             <span
-              className={`flex min-h-11 min-w-0 flex-1 items-center justify-center rounded-lg px-1 text-center text-sm leading-tight font-bold [overflow-wrap:anywhere] peer-checked:bg-court peer-checked:text-paper ${FOCUS_RING}`}
+              className={`flex min-h-11 min-w-0 flex-1 items-center justify-center rounded-lg px-1 text-center text-sm leading-tight font-bold [overflow-wrap:anywhere] peer-checked:bg-court [@media(max-width:520px)]:text-[13px] peer-checked:text-paper ${FOCUS_RING}`}
             >
               {label}
             </span>
@@ -68,11 +68,11 @@ function CheckboxRow({
         className={HIDDEN_INPUT}
       />
       <span
-        className={`flex min-h-11 min-w-0 flex-1 items-center gap-[13px] rounded-control px-1 font-semibold peer-checked:[&>span]:border-court peer-checked:[&>span]:bg-court peer-checked:[&_svg]:block ${FOCUS_RING}`}
+        className={`flex min-h-11 min-w-0 flex-1 items-center gap-[13px] rounded-control px-1 font-semibold peer-checked:[&>[aria-hidden]]:border-court peer-checked:[&>[aria-hidden]]:bg-court peer-checked:[&_svg]:block ${FOCUS_RING}`}
       >
         <span
           aria-hidden="true"
-          className="grid size-5 flex-none place-items-center rounded-[4px] border border-muted bg-paper"
+          className="grid size-5 flex-none place-items-center rounded-[3px] border border-muted bg-paper"
         >
           <svg
             viewBox="0 0 16 16"

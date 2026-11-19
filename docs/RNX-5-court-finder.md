@@ -29,6 +29,11 @@ URL, so a reload, a shared link and a no-JavaScript submit all return the same r
   the focus ring is drawn on the visible option next to the input.
 - `Results` keeps one `aria-live="polite"` region mounted for the count line and local
   time note. The "Clear filters" link sits outside it, so it is not re-announced.
+- Without JavaScript, React cannot move streamed content into the Suspense boundary. A
+  `<noscript>` stylesheet in `FinderSkeleton` reveals the hidden streamed finder and
+  uses flex order to place it after the heading. It depends on React's streaming markup,
+  so recheck it when upgrading React or Next.js. The controls still come last in
+  keyboard order in this mode, because the element stays at the end of `<body>`.
 - `CourtRow` displays what `queryCourts` returns. Status text comes from the row, and
   slot times are formatted in the court's own time zone.
 

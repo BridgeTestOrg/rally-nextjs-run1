@@ -19,7 +19,7 @@ export async function FinderBody({
   const { rows, count } = queryCourts(filters, now());
 
   return (
-    <div className={FINDER_LAYOUT}>
+    <div data-finder-body="" className={FINDER_LAYOUT}>
       <FilterForm filters={filters} />
       <Results rows={rows} count={count} day={filters.day} />
     </div>

@@ -17,8 +17,8 @@ export function CourtRow({ row }: { row: CourtRowData }) {
 
   return (
     <div
-      className={`rounded-card border border-line px-[18px] pt-3.5 pb-4 ${
-        row.closed ? "bg-ground" : "bg-paper"
+      className={`rounded-card border border-line px-[18px] pt-3.5 ${
+        row.closed ? "bg-ground pb-[18px]" : "bg-paper pb-4"
       }`}
     >
       <div className="flex items-start gap-3">
@@ -26,9 +26,9 @@ export function CourtRow({ row }: { row: CourtRowData }) {
           <h3 className="font-display text-lg leading-[1.3] font-semibold">
             {row.name}
           </h3>
-          <p className="text-sm text-muted">{meta}</p>
+          <p className="mt-px text-sm text-muted">{meta}</p>
           <p
-            className={`mt-1 text-sm font-semibold ${
+            className={`mt-1.5 text-sm font-semibold ${
               row.closed ? "text-badge-grey-text" : "text-court-2"
             }`}
           >

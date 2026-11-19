@@ -2,6 +2,43 @@
 export const FINDER_LAYOUT =
   "mt-7 grid grid-cols-[360px_minmax(0,1fr)] items-start gap-7 [@media(max-width:1024px)]:grid-cols-[minmax(0,1fr)]";
 
+/**
+ * Without JavaScript, React cannot swap streamed content into the Suspense
+ * boundary: the finished finder stays in a hidden element at the end of <body>.
+ * These rules show that element and place it where the skeleton was. The display
+ * rule sits in an early layer because Tailwind's reset hides [hidden] with a
+ * layered !important, which only an earlier layer can override.
+ */
+const NO_SCRIPT_CSS = `
+@layer theme {
+  body > div[hidden]:has(> [data-finder-body]) { display: flow-root !important; }
+}
+body { display: flex; flex-direction: column; }
+body > * { min-width: 0; }
+main { display: contents; }
+#courts { padding-bottom: 0; }
+#courts [aria-busy] { display: none; }
+#courts ~ section, body > footer { order: 2; }
+body > div:has(> [data-finder-body]) {
+  order: 1;
+  padding-bottom: var(--spacing-section);
+  background: var(--color-paper);
+}
+[data-finder-body] {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: var(--container-page);
+  margin-inline: auto;
+  padding-inline: var(--spacing-gutter);
+}
+@media (max-width: 768px) {
+  body > div:has(> [data-finder-body]) { padding-bottom: 56px; }
+}
+@media (max-width: 520px) {
+  [data-finder-body] { padding-inline: 16px; }
+}
+`;
+
 const PANEL_GROUPS = ["state", "day", "time"];
 const CHECK_ROWS = ["lights", "parking"];
 const CARD_HEIGHTS = [
@@ -24,6 +61,9 @@ export function FinderSkeleton() {
       aria-labelledby="courts-heading"
       className={FINDER_LAYOUT}
     >
+      <noscript>
+        <style dangerouslySetInnerHTML={{ __html: NO_SCRIPT_CSS }} />
+      </noscript>
       <div
         aria-hidden="true"
         className="grid min-w-0 gap-5 rounded-card bg-ground p-5 [@media(max-width:520px)]:p-3.5"
