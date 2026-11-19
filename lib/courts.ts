@@ -210,6 +210,12 @@ function parseCourtsFile(value: unknown) {
     throw invalid('courts', 'a non-empty array')
   }
 
+  for (const state of STATES) {
+    if (!courts.some((court) => court.state === state)) {
+      throw invalid('courts', `an array with a court in ${state}`)
+    }
+  }
+
   const seen = new Set<string>()
 
   courts.forEach((court, index) => {

@@ -28,6 +28,11 @@ export type ConditionsEntry = {
 
 const STATE_ORDER: readonly Court['state'][] = ['CO', 'CA', 'NJ']
 
+// A timed-out cache fill rejects at the budget too. Waiting this little longer
+// lets it finish failing first. Otherwise the next request could join the dying
+// fill instead of trying the weather service again.
+const CACHE_SETTLE_MS = 250
+
 function reportUnexpected(state: string, error: unknown): void {
   if (!isWeatherFailure(error)) {
     console.error(`Conditions failed unexpectedly for ${state}.`, error)
@@ -35,23 +40,25 @@ function reportUnexpected(state: string, error: unknown): void {
 }
 
 /**
- * Runs `work` under one city's deadline, and stops waiting when it passes even
- * if `work` ignores the signal. Work that fails after that is still observed.
+ * Runs `work` under one city's budget. Its signal aborts at the budget, and the
+ * wait ends just after that even if `work` ignores the signal. Work that fails
+ * after the wait ends is still observed.
  */
 function withDeadline<T>(
   state: string,
   work: (signal: AbortSignal) => Promise<T>,
 ): Promise<T> {
   const signal = AbortSignal.timeout(CITY_BUDGET_MS)
+  const cutoff = AbortSignal.timeout(CITY_BUDGET_MS + CACHE_SETTLE_MS)
 
   return new Promise<T>((resolve, reject) => {
     let expired = false
     const onDeadline = () => {
       expired = true
-      reject(weatherFailure('The weather budget ran out.', signal.reason))
+      reject(weatherFailure('The weather budget ran out.', cutoff.reason))
     }
 
-    signal.addEventListener('abort', onDeadline, { once: true })
+    cutoff.addEventListener('abort', onDeadline, { once: true })
     work(signal)
       .then(resolve, (error: unknown) => {
         if (expired) {
@@ -60,7 +67,7 @@ function withDeadline<T>(
           reject(error)
         }
       })
-      .finally(() => signal.removeEventListener('abort', onDeadline))
+      .finally(() => cutoff.removeEventListener('abort', onDeadline))
   })
 }
 

@@ -28,8 +28,10 @@ and on a clock that tests can replace, so the logic lives in one place.
   parking, and `day` has no effect on it.
 - `lib/weather.ts` makes the two NWS requests with redirects off. The hourly URL must be
   on the same origin as `WEATHER_URL`.
-- `lib/conditions.ts` fetches the three cities at once, with one 3 second deadline per
-  city that covers the cache lookup and any fallback fetch. It never rejects.
+- `lib/conditions.ts` fetches the three cities at once, with one 3 second budget per
+  city that covers the cache lookup and any fallback fetch. It waits 250 ms past the
+  budget so a timed-out cache fill finishes failing and the next request retries. It
+  never rejects.
 
 ## Forecast cache
 
