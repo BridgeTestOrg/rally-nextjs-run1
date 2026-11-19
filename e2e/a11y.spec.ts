@@ -73,8 +73,16 @@ test.describe('keyboard at 1280px', () => {
     const expected = await page.evaluate((selector) => {
       const all = Array.from(document.querySelectorAll('*'))
 
+      // Tab enters a radio group once, at its checked option.
+      const isTabStop = (element: Element) =>
+        !(
+          element instanceof HTMLInputElement &&
+          element.type === 'radio' &&
+          !element.checked
+        )
+
       return Array.from(document.querySelectorAll(selector))
-        .filter((element) => element.checkVisibility())
+        .filter((element) => element.checkVisibility() && isTabStop(element))
         .map((element) => all.indexOf(element))
     }, INTERACTIVE)
 

@@ -171,7 +171,6 @@ describe('section shells', () => {
       content.finder,
       <FinderSection key="courts" searchParams={searchParams} />,
     ],
-    ['waitlist', content.waitlist, <WaitlistSection key="waitlist" />],
   ])('%s renders only its eyebrow and heading', (id, copy, element) => {
     render(element)
 
@@ -182,6 +181,18 @@ describe('section shells', () => {
     expect(section.textContent).toBe(`${copy.eyebrow}${copy.heading}`)
     expect(section.querySelector('form, a, button, input')).toBeNull()
   })
+})
+
+test('waitlist keeps its anchor and heading around the form', () => {
+  render(<WaitlistSection />)
+
+  const section = screen.getByRole('region', {
+    name: content.waitlist.heading,
+  })
+
+  expect(section.id).toBe('waitlist')
+  expect(within(section).getByText(content.waitlist.eyebrow)).toBeDefined()
+  expect(section.querySelector('form')).not.toBeNull()
 })
 
 describe('Page', () => {
