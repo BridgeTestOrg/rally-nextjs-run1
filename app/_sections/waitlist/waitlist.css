@@ -1,0 +1,229 @@
+/* Loaded by the waitlist section. Every selector is scoped to rally-waitlist. */
+@layer components {
+  .rally-waitlist__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.22fr);
+    align-items: start;
+    gap: 48px;
+  }
+
+  .rally-waitlist__intro,
+  .rally-waitlist__action {
+    min-width: 0;
+  }
+
+  .rally-waitlist__intro .rally-eyebrow {
+    line-height: 1.55;
+  }
+
+  .rally-waitlist__intro .rally-section-heading__title {
+    margin-top: 10px;
+  }
+
+  .rally-waitlist__lead {
+    margin-top: 12px;
+    color: var(--color-on-court);
+    font-size: 18px;
+    line-height: 1.5;
+  }
+
+  .rally-waitlist__perks {
+    display: grid;
+    gap: 12px;
+    margin-top: 28px;
+  }
+
+  .rally-waitlist__perk {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    color: var(--color-paper);
+    font-weight: 600;
+  }
+
+  .rally-waitlist__check {
+    flex: none;
+    width: 22px;
+    height: 22px;
+    margin-top: 1px;
+  }
+
+  .rally-waitlist__card {
+    box-sizing: border-box;
+    min-width: 0;
+    padding: 28px;
+    /* The comps round this card more than the 14px card token. */
+    border-radius: 18px;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    overflow-wrap: anywhere;
+  }
+
+  .rally-waitlist__field,
+  .rally-waitlist__fieldset {
+    min-width: 0;
+    margin: 0 0 18px;
+  }
+
+  .rally-waitlist__fieldset {
+    padding: 0;
+    border: 0;
+  }
+
+  .rally-waitlist__label {
+    display: block;
+    margin-bottom: 6px;
+    padding: 0;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .rally-waitlist__control {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    padding: 8px 14px;
+    border: 1px solid color-mix(in srgb, var(--color-muted) 22%, var(--color-line));
+    border-radius: var(--radius-control);
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-size: 16px;
+  }
+
+  .rally-waitlist__control::placeholder {
+    color: color-mix(in srgb, var(--color-muted) 85%, var(--color-paper));
+  }
+
+  .rally-waitlist__control[aria-invalid="true"] {
+    border-color: var(--color-error);
+  }
+
+  .rally-waitlist__error {
+    margin: 6px 0 1px;
+    color: var(--color-error);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  .rally-waitlist__segments {
+    display: flex;
+    gap: 4px;
+    padding: 3px 3px 7px;
+    border: 1px solid var(--color-line);
+    border-radius: 12px;
+  }
+
+  .rally-waitlist__segment {
+    position: relative;
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .rally-waitlist__segment input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    cursor: pointer;
+    opacity: 0;
+  }
+
+  .rally-waitlist__segment span {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: 44px;
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.25;
+    text-align: center;
+  }
+
+  .rally-waitlist__segment input:checked + span {
+    background: var(--color-court);
+    color: var(--color-paper);
+  }
+
+  .rally-waitlist__segment input:focus-visible + span {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  .rally-waitlist__server-error {
+    margin: 0 0 18px;
+  }
+
+  .rally-waitlist__fine {
+    margin-top: 18px;
+    color: var(--color-muted);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .rally-waitlist__visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .rally-waitlist__result-title {
+    margin-top: 12px;
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .rally-waitlist__result-title--duplicate {
+    font-size: 25px;
+    line-height: 30px;
+  }
+
+  .rally-waitlist__result-body {
+    margin-top: 8px;
+    color: var(--color-muted);
+  }
+
+  .rally-waitlist__result-cta {
+    margin-top: 16px;
+  }
+
+  /* Breakpoints apply at or below the named width. */
+  @media (max-width: 768px) {
+    .rally-waitlist__layout {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 32px;
+    }
+
+    .rally-waitlist__lead {
+      line-height: 1.55;
+    }
+
+    .rally-waitlist__result-title {
+      font-size: 28px;
+    }
+
+    .rally-waitlist__result-title--duplicate {
+      font-size: 26px;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .rally-waitlist__segment span {
+      font-size: 13px;
+    }
+  }
+}
