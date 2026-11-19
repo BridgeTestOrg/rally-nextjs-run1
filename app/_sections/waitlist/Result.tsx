@@ -36,7 +36,9 @@ export function WaitlistResult({ state }: { state: ResultState }) {
   return (
     <div className="rally-waitlist__card">
       <Badge variant="duplicate">{duplicate.badge}</Badge>
-      <h3 className="rally-waitlist__result-title">{duplicate.title}</h3>
+      <h3 className="rally-waitlist__result-title rally-waitlist__result-title--duplicate">
+        {duplicate.title}
+      </h3>
       <p className="rally-waitlist__result-body">
         {fill(duplicate.body, { email, city: cityLabel, date })}
       </p>

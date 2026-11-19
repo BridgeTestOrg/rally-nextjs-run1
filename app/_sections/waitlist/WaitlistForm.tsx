@@ -126,7 +126,7 @@ export function WaitlistForm() {
           action={formAction}
           onSubmit={handleSubmit}
           noValidate
-          className="rally-waitlist__card rally-waitlist__form"
+          className="rally-waitlist__card"
         >
           <div className="rally-waitlist__field">
             <label htmlFor="waitlist-email" className="rally-waitlist__label">
@@ -159,10 +159,10 @@ export function WaitlistForm() {
               {...errorProps(ERROR_ID.city, errors.city)}
             >
               {knownCity ? null : <option value="" hidden />}
+              {/* The label attribute keeps city names out of the page text,
+                  where the hero card shows the visitor's city. */}
               {Object.entries(waitlist.cities).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
+                <option key={value} value={value} label={label} />
               ))}
             </select>
             <FieldError id={ERROR_ID.city} message={errors.city} />
@@ -192,16 +192,13 @@ export function WaitlistForm() {
 
           <div aria-live="polite">
             {failed?.serverError ? (
-              <p className="rally-waitlist__error">{failed.serverError}</p>
+              <p className="rally-waitlist__error rally-waitlist__server-error">
+                {failed.serverError}
+              </p>
             ) : null}
           </div>
 
-          <Button
-            variant="court"
-            type="submit"
-            loading={pending}
-            className="rally-waitlist__submit"
-          >
+          <Button variant="court" type="submit" loading={pending}>
             {pending ? waitlist.submitting : waitlist.submit}
           </Button>
 

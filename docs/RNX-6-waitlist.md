@@ -18,6 +18,8 @@ page's way of collecting city-segmented interest before launch.
   migrations inside `BEGIN IMMEDIATE`, so concurrent processes run them once.
   `PRAGMA user_version` records the applied version. Opening fails if the schema
   cannot reach version 1.
+  SQLite does not apply `busy_timeout` to the switch into WAL mode, so `openDb()`
+  retries that switch for up to five seconds when several processes start together.
 - `getDb()` opens `DATABASE_PATH` (default `data/rally.db`) on first use, never at
   import time. A handle from `openDb()` belongs to its caller.
 - `join()` in `lib/waitlist.ts` inserts first with `ON CONFLICT(email) DO NOTHING`,
@@ -31,6 +33,7 @@ page's way of collecting city-segmented interest before launch.
   enhanced and no-JavaScript submissions. Controls remount after each returned state,
   which stops React's form reset from clearing the kept values. Error messages sit
   outside the remounted controls in live regions that stay mounted.
+  City options use the `label` attribute, so the names do not repeat as page text.
 - `WaitlistSection` stays a static Server Component with no database or clock read.
 
 ## Key files
@@ -44,6 +47,8 @@ page's way of collecting city-segmented interest before launch.
 | `app/_sections/waitlist/WaitlistForm.tsx`, `Result.tsx`, `Section.tsx` | Interface |
 | `app/_sections/waitlist/waitlist.css` | Section styles |
 | `next.config.ts` | Includes the migration SQL in the server trace |
+| `__tests__/waitlist.test.ts`, `__tests__/WaitlistForm.test.tsx` | Unit and component tests |
+| `e2e/waitlist.waitlist.spec.ts` | Browser tests, including JavaScript-off posts |
 
 ## Configuration and data
 

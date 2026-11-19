@@ -5,7 +5,11 @@ import { DatabaseSync } from "node:sqlite";
 /** The lowest schema this code can run against, whatever is on disk. */
 const REQUIRED_SCHEMA_VERSION = 1;
 
-const MIGRATION_FILE = /^(\d{3})_.+\.sql$/;
+const MIGRATION_FILE = /^(\d+)_.+\.sql$/;
+
+const BUSY_TIMEOUT_MS = 5000;
+const WAL_RETRY_DELAY_MS = 10;
+const SQLITE_BUSY = 5;
 
 type Migration = { version: number; file: string };
 
@@ -40,6 +44,34 @@ function closeQuietly(db: DatabaseSync) {
     db.close();
   } catch {
     // The failure that led here is the one worth reporting.
+  }
+}
+
+function isBusy(error: unknown) {
+  const code = (error as { errcode?: unknown }).errcode;
+
+  // The low byte of an extended SQLite result code is its primary code.
+  return typeof code === "number" && (code & 0xff) === SQLITE_BUSY;
+}
+
+/**
+ * SQLite does not apply `busy_timeout` to the switch into WAL mode, so processes
+ * opening a new file together retry here, within the same time budget.
+ */
+function enableWal(db: DatabaseSync) {
+  const pause = new Int32Array(new SharedArrayBuffer(4));
+
+  for (let waited = 0; ; waited += WAL_RETRY_DELAY_MS) {
+    try {
+      db.exec("PRAGMA journal_mode=WAL");
+      return;
+    } catch (error) {
+      if (!isBusy(error) || waited >= BUSY_TIMEOUT_MS) {
+        throw error;
+      }
+
+      Atomics.wait(pause, 0, 0, WAL_RETRY_DELAY_MS);
+    }
   }
 }
 
@@ -106,8 +138,8 @@ export function openDb(databasePath: string): DatabaseSync {
 
   try {
     // First, so the statements after it wait for locks instead of failing.
-    db.exec("PRAGMA busy_timeout=5000");
-    db.exec("PRAGMA journal_mode=WAL");
+    db.exec(`PRAGMA busy_timeout=${BUSY_TIMEOUT_MS}`);
+    enableWal(db);
     migrate(db);
 
     return db;

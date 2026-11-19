@@ -12,11 +12,19 @@
     min-width: 0;
   }
 
+  .rally-waitlist__intro .rally-eyebrow {
+    line-height: 1.55;
+  }
+
+  .rally-waitlist__intro .rally-section-heading__title {
+    margin-top: 10px;
+  }
+
   .rally-waitlist__lead {
     margin-top: 12px;
     color: var(--color-on-court);
     font-size: 18px;
-    line-height: 1.55;
+    line-height: 1.5;
   }
 
   .rally-waitlist__perks {
@@ -44,38 +52,30 @@
     box-sizing: border-box;
     min-width: 0;
     padding: 28px;
-    border-radius: var(--radius-card);
+    /* The comps round this card more than the 14px card token. */
+    border-radius: 18px;
     background: var(--color-paper);
     color: var(--color-ink);
     overflow-wrap: anywhere;
   }
 
-  .rally-waitlist__form {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    justify-items: start;
-    row-gap: 20px;
-  }
-
   .rally-waitlist__field,
   .rally-waitlist__fieldset {
-    width: 100%;
     min-width: 0;
+    margin: 0 0 18px;
   }
 
   .rally-waitlist__fieldset {
-    margin: 0;
     padding: 0;
     border: 0;
   }
 
   .rally-waitlist__label {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     padding: 0;
     font-size: 15px;
     font-weight: 600;
-    line-height: 1.4;
   }
 
   .rally-waitlist__control {
@@ -84,7 +84,7 @@
     min-width: 0;
     min-height: 48px;
     padding: 8px 14px;
-    border: 1px solid color-mix(in srgb, var(--color-muted) 50%, var(--color-paper));
+    border: 1px solid color-mix(in srgb, var(--color-muted) 22%, var(--color-line));
     border-radius: var(--radius-control);
     background: var(--color-paper);
     color: var(--color-ink);
@@ -100,7 +100,7 @@
   }
 
   .rally-waitlist__error {
-    margin-top: 8px;
+    margin: 6px 0 1px;
     color: var(--color-error);
     font-size: 14px;
     font-weight: 600;
@@ -110,7 +110,7 @@
   .rally-waitlist__segments {
     display: flex;
     gap: 4px;
-    padding: 3px;
+    padding: 3px 3px 7px;
     border: 1px solid var(--color-line);
     border-radius: 12px;
   }
@@ -139,7 +139,7 @@
     justify-content: center;
     box-sizing: border-box;
     min-width: 0;
-    min-height: 48px;
+    min-height: 44px;
     padding: 4px 8px;
     border-radius: 8px;
     font-size: 14px;
@@ -158,12 +158,12 @@
     outline-offset: 2px;
   }
 
-  .rally-waitlist__submit {
-    margin-top: -2px;
+  .rally-waitlist__server-error {
+    margin: 0 0 18px;
   }
 
   .rally-waitlist__fine {
-    margin-top: -2px;
+    margin-top: 18px;
     color: var(--color-muted);
     font-size: 13px;
     line-height: 1.5;
@@ -182,9 +182,14 @@
   .rally-waitlist__result-title {
     margin-top: 12px;
     font-family: var(--font-display);
-    font-size: 26px;
+    font-size: 30px;
     font-weight: 800;
     line-height: 1.2;
+  }
+
+  .rally-waitlist__result-title--duplicate {
+    font-size: 25px;
+    line-height: 30px;
   }
 
   .rally-waitlist__result-body {
@@ -201,6 +206,24 @@
     .rally-waitlist__layout {
       grid-template-columns: minmax(0, 1fr);
       gap: 32px;
+    }
+
+    .rally-waitlist__lead {
+      line-height: 1.55;
+    }
+
+    .rally-waitlist__result-title {
+      font-size: 28px;
+    }
+
+    .rally-waitlist__result-title--duplicate {
+      font-size: 26px;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .rally-waitlist__segment span {
+      font-size: 13px;
     }
   }
 }
