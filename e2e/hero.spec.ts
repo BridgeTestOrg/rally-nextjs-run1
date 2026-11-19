@@ -19,9 +19,12 @@ async function expectCard(
   page: Page,
   shown: { badge: string; name: string; line: string },
 ) {
-  await expect(page.getByText(shown.badge, { exact: true })).toBeVisible()
-  await expect(page.getByText(shown.name, { exact: true })).toBeVisible()
-  await expect(page.getByText(shown.line, { exact: true })).toBeVisible()
+  // Scoped to the hero card: the Live section repeats the city names.
+  const heroCard = page.locator('.rally-hero-card')
+
+  await expect(heroCard.getByText(shown.badge, { exact: true })).toBeVisible()
+  await expect(heroCard.getByText(shown.name, { exact: true })).toBeVisible()
+  await expect(heroCard.getByText(shown.line, { exact: true })).toBeVisible()
 }
 
 for (const viewport of VIEWPORTS) {
