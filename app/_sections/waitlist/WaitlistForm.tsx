@@ -10,11 +10,11 @@ import {
 } from "react";
 import { Button } from "@/app/_components/Button";
 import { content } from "@/lib/content";
-import type { WaitlistState, WaitlistValues } from "@/lib/waitlist";
+import type { WaitlistValues } from "@/lib/waitlist";
 import { joinWaitlist } from "./actions";
+import { useWaitlistFlash } from "./FlashContext";
 import { WaitlistResult } from "./Result";
 
-const INITIAL_STATE: WaitlistState = { status: "idle" };
 const INITIAL_VALUES: WaitlistValues = {
   email: "",
   city: "highlands-ranch",
@@ -51,10 +51,8 @@ function FieldError({ id, message }: { id: string; message?: string }) {
 
 export function WaitlistForm() {
   const { waitlist } = content;
-  const [state, formAction, pending] = useActionState(
-    joinWaitlist,
-    INITIAL_STATE,
-  );
+  const flash = useWaitlistFlash();
+  const [state, formAction, pending] = useActionState(joinWaitlist, flash);
   const formRef = useRef<HTMLFormElement>(null);
   const submittingRef = useRef(false);
   const focusedFieldRef = useRef<string | null>(null);
