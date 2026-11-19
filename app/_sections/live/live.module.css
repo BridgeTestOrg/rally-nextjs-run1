@@ -1,0 +1,342 @@
+/*
+ * Loaded by the live section. The Turbopack rule in next.config.ts handles every
+ * *.css file as plain CSS, so this module exports no class map. It is imported
+ * for its side effect and every selector is scoped to rally-live.
+ */
+@layer components {
+  /*
+   * The static heading and the streamed region share these tracks. The region
+   * spans them with subgrid, so its stamp and body line up with the heading
+   * without the boundary resizing it. The stamp column is a fixed width for the
+   * same reason.
+   */
+  .rally-live {
+    --rally-live-card-height: 230px;
+
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    grid-template-rows: auto auto;
+  }
+
+  .rally-live__heading {
+    position: relative;
+    grid-area: 1 / 1;
+    min-width: 0;
+  }
+
+  .rally-live__heading .rally-eyebrow {
+    line-height: 1.55;
+  }
+
+  .rally-live__heading .rally-section-heading__title {
+    margin-top: 10px;
+  }
+
+  .rally-live__region,
+  .rally-live__state {
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-template-rows: subgrid;
+    grid-column: 1 / -1;
+    grid-row: 1 / -1;
+    min-width: 0;
+  }
+
+  .rally-live__stamp {
+    display: flex;
+    grid-area: 1 / 2;
+    align-items: center;
+    align-self: end;
+    justify-content: flex-end;
+    gap: 8px;
+    min-width: 0;
+    min-height: 21px;
+    padding-bottom: 15px;
+    color: var(--color-muted);
+    font-size: 14px;
+    line-height: 1.5;
+    text-align: right;
+  }
+
+  .rally-live__dot {
+    flex: none;
+    width: 10px;
+    height: 10px;
+    margin-inline: 4px 0;
+    border-radius: var(--radius-pill);
+    background: var(--color-court-surface);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-court-surface) 20%, var(--color-paper));
+  }
+
+  .rally-live__body {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    min-width: 0;
+    margin-top: 28px;
+  }
+
+  .rally-live__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  /* The one place a card's height is set, for live and skeleton cards alike. */
+  .rally-live__card-box {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    height: var(--rally-live-card-height);
+    min-width: 0;
+    padding: 15px 18px 6px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    background: var(--color-paper);
+  }
+
+  .rally-live__city {
+    color: var(--color-ink);
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    overflow-wrap: anywhere;
+  }
+
+  .rally-live__local-time {
+    margin-top: 2px;
+    color: var(--color-muted);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .rally-live__verdict {
+    display: flex;
+    margin-top: 13px;
+  }
+
+  .rally-live__divider {
+    flex: none;
+    height: 1px;
+    margin-top: 12px;
+    background: var(--color-line);
+  }
+
+  .rally-live__stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  /* Label first for screen readers, value on top as in the comps. */
+  .rally-live__stat {
+    display: flex;
+    flex-direction: column-reverse;
+    min-width: 0;
+  }
+
+  .rally-live__stat-value {
+    color: var(--color-ink);
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.3;
+  }
+
+  .rally-live__stat-label {
+    margin-top: 3px;
+    color: var(--color-muted);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  /* Fills the rest of the box, so a wrapped line stays inside it. */
+  .rally-live__next-open {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    min-height: 0;
+    color: var(--color-court-2);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+  }
+
+  .rally-live__unavailable {
+    margin-top: 12px;
+    color: var(--color-muted);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .rally-live__unavailable-title {
+    font-weight: 700;
+  }
+
+  .rally-live__card-box--down .rally-live__divider {
+    margin-top: 13px;
+  }
+
+  /* Every-city notice */
+  .rally-live__notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    box-sizing: border-box;
+    min-width: 0;
+    padding: 20px;
+    border: 1px dashed color-mix(in srgb, var(--color-muted) 30%, var(--color-line));
+    border-radius: var(--radius-card);
+    background: var(--color-paper);
+  }
+
+  .rally-live__notice-icon {
+    flex: none;
+    width: 28px;
+    height: 28px;
+  }
+
+  .rally-live__notice-text {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .rally-live__notice-title {
+    color: var(--color-ink);
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.55;
+  }
+
+  .rally-live__notice-body {
+    margin-top: 3px;
+    color: var(--color-muted);
+    font-size: 16px;
+    line-height: 1.55;
+  }
+
+  /* Skeleton */
+  .rally-live__shimmer {
+    flex: none;
+    border-radius: 8px;
+    background: linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--color-line) 45%, var(--color-paper)) 25%,
+        color-mix(in srgb, var(--color-line) 35%, var(--color-paper)) 50%,
+        color-mix(in srgb, var(--color-line) 45%, var(--color-paper)) 75%
+      )
+      0 0 / 200% 100%;
+    animation: rally-live-shimmer 1.4s linear infinite;
+  }
+
+  .rally-live__shimmer--city {
+    width: 70%;
+    height: 20px;
+    margin-top: 4px;
+  }
+
+  .rally-live__shimmer--time {
+    width: 45%;
+    height: 14px;
+    margin-top: 10px;
+  }
+
+  .rally-live__shimmer--badge {
+    width: 84px;
+    height: 28px;
+    margin-top: 14px;
+    border-radius: 10px;
+  }
+
+  .rally-live__shimmer--value {
+    width: 70%;
+    height: 16px;
+    margin-top: 3px;
+  }
+
+  .rally-live__shimmer--label {
+    width: 50%;
+    height: 11px;
+    margin-top: 11px;
+  }
+
+  .rally-live__shimmer--next {
+    width: 85%;
+    height: 14px;
+    margin-top: 4px;
+  }
+
+  .rally-live__skeleton-stat {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .rally-live__skeleton-next {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    min-height: 0;
+  }
+}
+
+@keyframes rally-live-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: -100% 0;
+  }
+}
+
+/* Applies at or below the named width, like the Foundation breakpoints. */
+@media (max-width: 1024px) {
+  .rally-live {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+  }
+
+  .rally-live__region {
+    grid-row: 2 / -1;
+  }
+
+  /* Two lines are reserved, so a stamp that wraps moves nothing below it. */
+  .rally-live__stamp {
+    grid-area: 1 / 1;
+    align-items: flex-start;
+    align-self: start;
+    justify-content: flex-start;
+    min-height: 42px;
+    margin-top: 29px;
+    padding-bottom: 0;
+    text-align: left;
+  }
+
+  .rally-live__dot {
+    margin-block-start: 6px;
+    margin-inline: 0;
+  }
+
+  .rally-live__body {
+    margin-top: 20px;
+  }
+
+  .rally-live__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rally-live__card-box--down {
+    height: auto;
+    padding-bottom: 17px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rally-live__shimmer {
+    animation: none;
+  }
+}

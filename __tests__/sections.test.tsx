@@ -164,8 +164,17 @@ test('Footer renders the legal line and links', () => {
 describe('section shells', () => {
   const { searchParams } = unreadSearchParams()
 
+  test('live keeps its anchor, eyebrow and heading and renders its loading state', () => {
+    render(<LiveSection />)
+
+    const section = screen.getByRole('region', { name: content.live.heading })
+
+    expect(section.id).toBe('live')
+    expect(within(section).getByText(content.live.eyebrow)).toBeDefined()
+    expect(within(section).getByText(content.live.stampLoading)).toBeDefined()
+  })
+
   test.each([
-    ['live', content.live, <LiveSection key="live" />],
     [
       'courts',
       content.finder,
